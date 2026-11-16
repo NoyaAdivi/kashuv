@@ -26,8 +26,9 @@ function beep() {
   } catch (e) {}
 }
 
-let cleanup = () => {};
+let cleanup = () => {}, routeId = 0;
 async function route() {
+  const my = ++routeId;
   cleanup(); cleanup = () => {}; main.onclick = null; document.body.classList.remove('focus');
   const [, view, id] = location.hash.split('/');
   document.querySelectorAll('[data-nav]').forEach((a) => a.setAttribute('aria-current', a.dataset.nav === (view || 'home') ? 'page' : 'false'));
@@ -37,7 +38,7 @@ async function route() {
     else if (view === 'library') await libraryView();
     else if (view === 's' && id) await summaryView(id);
     else await homeView();
-  } catch (e) { main.innerHTML = `<div class="card empty">😕 ${esc(e.message)}</div>`; }
+  } catch (e) { if (my === routeId) main.innerHTML = `<div class="card empty">😕 ${esc(e.message)}</div>`; }
 }
 addEventListener('hashchange', route);
 
