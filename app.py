@@ -48,6 +48,14 @@ def index():
     return render_template("index.html")
 
 
+@app.get("/sw.js")
+def service_worker():
+    # served from the root so the app can be installed and work offline
+    res = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+    res.headers["Cache-Control"] = "no-cache"
+    return res
+
+
 @app.get("/api/health")
 def health():
     return jsonify(ollama=summarize.ollama_ok(), whisper=config.WHISPER_MODEL, loaded=transcribe.is_loaded())

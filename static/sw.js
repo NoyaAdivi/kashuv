@@ -1,5 +1,5 @@
 /* Service worker: makes the site an installable app that also opens offline. */
-const VERSION = 'kashuv-v1';
+const VERSION = 'kashuv-v2';
 const SHELL = ["/", "/static/style.css", "/static/app.js", "/static/a11y.js", "/static/logo.svg", "/static/noya-app.js", "/static/faq.js", "/static/manifest.webmanifest", "/static/icons/icon-192.png"];
 
 self.addEventListener('install', (e) => {
