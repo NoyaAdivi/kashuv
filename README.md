@@ -5,6 +5,7 @@
 <p align="center"><a href="README.he.md"><img src="docs/readme/lang-he.svg" height="44" alt="לגרסה בעברית"></a></p>
 
 <p align="center">
+  <a href="https://noyaadivi.github.io/kashuv/"><img src="https://img.shields.io/badge/Try_the_live_demo-FBD5E0?style=for-the-badge&logo=googlechrome&logoColor=A03A5C" alt="Try the live demo"></a>
   <a href="#run-locally"><img src="https://img.shields.io/badge/Quick_start-FFD5C9?style=for-the-badge&logo=windows&logoColor=A8483A" alt="Quick start"></a>
   <a href="https://github.com/NoyaAdivi/kashuv/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/Download_ZIP-D9F3E7?style=for-the-badge&logo=github&logoColor=1F7350" alt="Download ZIP"></a>
   <a href="#how-it-works"><img src="https://img.shields.io/badge/How_it_works-DAD5FF?style=for-the-badge&logo=databricks&logoColor=5548C8" alt="How it works"></a>
@@ -73,28 +74,6 @@
   </tr>
 </table>
 
-<a name="app"></a>
-<h3 align="center">📲 App and FAQ <sub><sup>new</sup></sub></h3>
-<p align="center">Kashuv installs as a real app with its own icon, and the site answers common questions by topic.</p>
-
-<table>
-  <tr valign="top">
-    <td width="50%">
-      <ul>
-        <li><b>📲 Installable app (PWA):</b> its own icon and window on phone and desktop, named just Kashuv</li>
-        <li><b>⚡ Works offline</b> after the first visit, powered by a service worker</li>
-      </ul>
-    </td>
-    <td width="50%">
-      <ul>
-        <li><b>❓ FAQ by topic:</b> filter chips, search with highlighting and smooth animations</li>
-        <li><b>🔗 Built by Noya Adivi</b> with a LinkedIn link at the bottom of every page</li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
-
 <a name="see-it-in-action"></a>
 <p align="center"><a href="#how-it-works"><img src="docs/readme/screens-en.svg" width="100%" alt="See it in action"></a></p>
 
@@ -160,6 +139,9 @@ flowchart LR
    ```bash
    ollama pull gemma3:4b
    ```
+> [!NOTE]
+> The [online demo](https://noyaadivi.github.io/kashuv/) runs on GitHub Pages with sample data so you can click through every screen. Real recording and transcription need the local app below.
+
 3. Double click **`start.bat`**. The first run creates a virtual environment, installs everything and downloads the Hebrew speech model (about 1.6 GB). Kashuv then opens at `http://localhost:5170`.
 
 > [!TIP]

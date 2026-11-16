@@ -1,7 +1,7 @@
 <div dir="rtl">
 
 <p align="center">
-  <a href="#run-locally"><img src="docs/readme/banner-he.svg" width="100%" alt="Kashuv: להיות קשובים בכל זום עם תמלול חי, עזרה להתרכז וסיכומים מושקעים, בחינם ובמחשב שלכם"></a>
+  <a href="#run-locally"><img src="docs/readme/banner-he.svg" width="100%" alt="Kashuv: להיות קשובים בכל זום עם תמלול חי, עזרה להתרכז וסיכומים חכמים, בחינם ובמחשב שלכם"></a>
 </p>
 
 <p align="center"><a href="README.md"><img src="docs/readme/lang-en.svg" height="44" alt="Read in English"></a></p>

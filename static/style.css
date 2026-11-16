@@ -237,6 +237,13 @@ mark { background: var(--butter-soft); color: inherit; border-radius: 4px; paddi
 .a11y-size span { flex: 1; }
 .a11y-size button { width: 46px; text-align: center; }
 .a11y-panel .ghost { background: none; text-align: center; }
+.a11y-link { text-align: center; font-size: .9rem; }
+.a11y-hint { margin: 0; font-size: .78rem; color: var(--muted); text-align: center; }
+.foot-link { color: var(--muted); }
+.a11y-btn { transition: transform .25s, box-shadow .25s; animation: a11y-in .8s cubic-bezier(.2, 1.4, .4, 1) both; }
+.a11y-btn:hover { transform: scale(1.08) rotate(-8deg); }
+.a11y-btn.dragging { transform: scale(1.12); box-shadow: 0 0 0 8px color-mix(in srgb, var(--lilac) 30%, transparent), var(--shadow); transition: none; }
+@keyframes a11y-in { from { opacity: 0; transform: scale(.4); } }
 html.a11y-contrast { --muted: var(--ink); --line: var(--ink); }
 html.a11y-contrast .blobs { display: none; }
 html.a11y-still *, html.a11y-still *::before, html.a11y-still *::after { animation: none !important; transition: none !important; }

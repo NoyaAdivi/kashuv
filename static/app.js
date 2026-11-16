@@ -6,7 +6,7 @@ try { LANG = localStorage.getItem('kashuv-lang') || 'he'; } catch (e) {}
 const L = (he, en) => (LANG === 'en' ? en : he);
 const STEP = {
   loading: ['מכין את מודל התמלול (בפעם הראשונה זה לוקח כמה דקות)', 'Preparing the speech model (a few minutes the first time)'],
-  transcribing: ['מתמלל', 'Transcribing'], summarizing: ['כותב סיכום מושקע', 'Writing a stunning summary'],
+  transcribing: ['מתמלל', 'Transcribing'], summarizing: ['כותב סיכום חכם', 'Writing a stunning summary'],
 };
 function applyLang() {
   document.documentElement.lang = LANG; document.documentElement.dir = LANG === 'en' ? 'ltr' : 'rtl';
@@ -61,7 +61,7 @@ async function homeView() {
   <section class="hero">
     <div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div>
     <h1>${L("להיות <em>קשובים</em> בכל זום", "Stay <em>focused</em> in every Zoom")}</h1>
-    <p>${L("תמלול בזמן אמת, עזרה להתרכז, וסיכומים מושקעים שנראים כמו המחברת הכי מסודרת בכיתה. חינם, ובמחשב שלכם.", "Live transcription, focus helpers and stunning summaries that look like the neatest notes in class. Free, and on your own computer.")}</p>
+    <p>${L("תמלול בזמן אמת, עזרה להתרכז, וסיכומים חכמים שנראים כמו המחברת הכי מסודרת בכיתה. חינם, ובמחשב שלכם.", "Live transcription, focus helpers and stunning summaries that look like the neatest notes in class. Free, and on your own computer.")}</p>
     <div class="status-row" id="health"><span class="chip">${L("בודק את המערכת", "Checking system")}<span class="dots"></span></span></div>
   </section>
   <section class="choices">
