@@ -48,6 +48,19 @@ def index():
     return render_template("index.html")
 
 
+# installable app: the service worker must live at the root so it can control every page
+@app.get("/sw.js")
+def service_worker():
+    res = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
+    res.headers["Cache-Control"] = "no-cache"
+    return res
+
+
+@app.get("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(app.static_folder, "manifest.webmanifest", mimetype="application/manifest+json")
+
+
 @app.get("/api/health")
 def health():
     return jsonify(ollama=summarize.ollama_ok(), whisper=config.WHISPER_MODEL, loaded=transcribe.is_loaded())

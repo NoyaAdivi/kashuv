@@ -47,24 +47,24 @@ async function homeView() {
   main.innerHTML = `
   <section class="hero">
     <div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div>
-    <h1>להיות <em>קשובה</em> בכל זום</h1>
-    <p>תמלול בזמן אמת, עזרה להתרכז, וסיכומים מטורפים שנראים כמו מחברת של התלמידה הכי טובה בכיתה. חינם, ובמחשב שלך.</p>
-    <div class="status-row" id="health"><span class="chip">בודקת מערכת<span class="dots"></span></span></div>
+    <h1>להיות <em>קשובים</em> בכל זום</h1>
+    <p>תמלול בזמן אמת, עזרה להתרכז, וסיכומים מסודרים שנראים כמו המחברת הכי טובה בכיתה. חינם, ובמחשב שלך.</p>
+    <div class="status-row" id="health"><span class="chip">בודק את המערכת<span class="dots"></span></span></div>
   </section>
   <section class="choices">
     <div class="card choice lilacy pop" style="--i:1">
       <div class="big">🎧</div>
       <h2>זום חי</h2>
-      <p class="muted">מקשיבה למה שהמחשב משמיע (אפליקציית זום, זום בדפדפן, Meet), מתמללת, מסכמת תוך כדי ומקפיצה התראה כשאומרים את השם שלך.</p>
-      <a class="btn lilac" href="#/live">התחילי להקשיב</a>
+      <p class="muted">מקשיב למה שהמחשב משמיע (אפליקציית זום, זום בדפדפן, Meet), מתמלל, מסכם תוך כדי ומקפיץ התראה כשאומרים את השם שלך.</p>
+      <a class="btn lilac" href="#/live">להתחיל להקשיב</a>
     </div>
     <div class="card choice peachy pop" style="--i:2">
       <div class="big">🎬</div>
       <h2>סיכום מהקלטה</h2>
-      <p class="muted">יש לך הקלטה של זום או הרצאה? גררי אותה לכאן וקבלי תמלול וסיכום מלא.</p>
+      <p class="muted">יש לך הקלטה של זום או הרצאה? גוררים אותה לכאן ומקבלים תמלול וסיכום מלא.</p>
       <label class="drop" id="drop">
         <input type="file" id="file" class="vh" accept="audio/*,video/*,.mkv">
-        <b>גררי קובץ או לחצי לבחירה</b><br><span class="muted">mp4, m4a, mp3, wav ועוד</span>
+        <b>גוררים קובץ או לוחצים לבחירה</b><br><span class="muted">mp4, m4a, mp3, wav ועוד</span>
       </label>
       <label class="field">שפת ההקלטה
         <select id="lang"><option value="he">עברית</option><option value="en">אנגלית</option><option value="">זיהוי אוטומטי</option></select>
@@ -133,7 +133,7 @@ function watchJob(jid, sid) {
       if (sid) location.hash = '#/s/' + sid; else route();
       return;
     }
-    progressView(j.step || 'מתחילה', j.progress);
+    progressView(j.step || 'מתחיל', j.progress);
     setTimeout(tick, 1000);
   };
   tick();
@@ -169,14 +169,14 @@ async function liveView() {
   main.innerHTML = `
   <section class="live-setup">
     <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>זום חי</h1>
-    <p>פתחי את הזום (באפליקציה או בדפדפן) ולחצי התחלה. Kashuv שומעת את מה שהמחשב משמיע.</p></div>
+    <p>פותחים את הזום (באפליקציה או בדפדפן) ולוחצים התחלה. Kashuv שומע את מה שהמחשב משמיע.</p></div>
     <div class="card grid">
       <label class="field">שם הפגישה <input id="title" placeholder="למשל: מבני נתונים, הרצאה 5"></label>
       <label class="field">השם שלך (בשביל התראה כשקוראים לך) <input id="name" placeholder="נויה"></label>
       <label class="field">שפה <select id="lang"><option value="he">עברית</option><option value="en">אנגלית</option><option value="">זיהוי אוטומטי</option></select></label>
       <label class="check"><input type="checkbox" id="mic"> להקליט גם את המיקרופון שלי</label>
-      <p class="note">💛 חשוב: ספרי למשתתפים ולמרצה שאת מקליטה ומתמללת. ההקלטה נשמרת רק במחשב שלך.</p>
-      <button class="btn lilac" id="go">🎧 התחילי להקשיב</button>
+      <p class="note">💛 חשוב: ספרו למשתתפים ולמרצה שאתם מקליטים ומתמללים. ההקלטה נשמרת רק במחשב שלך.</p>
+      <button class="btn lilac" id="go">🎧 להתחיל להקשיב</button>
     </div>
   </section>`;
   try { const p = JSON.parse(localStorage.getItem('kashuv-live-prefs') || '{}'); if (p.name) $('#name').value = p.name; if (p.lang != null) $('#lang').value = p.lang; $('#mic').checked = !!p.mic; } catch (e) {}
@@ -194,14 +194,14 @@ function liveRun(id) {
   <div class="card live-top">
     <span class="orb idle" id="orb"></span><span class="timer" id="timer">00:00</span>
     <span class="meter" id="meter" aria-hidden="true">${'<b></b>'.repeat(8)}</span>
-    <span class="muted" id="lstatus">מתחברת לשמע<span class="dots"></span></span>
+    <span class="muted" id="lstatus">מתחבר לשמע<span class="dots"></span></span>
     <div class="live-tools">
       <button class="btn soft small" data-missed="2">🙈 מה פספסתי? 2 דק'</button>
       <button class="btn soft small" data-missed="5">5 דק'</button>
       <button class="btn soft small" data-missed="10">10 דק'</button>
       <button class="btn soft small" id="mark">⭐ רגע חשוב</button>
       <button class="btn soft small" id="focus" aria-pressed="false">🎯 מצב ריכוז</button>
-      <button class="btn peach small" id="stop">⏹ סיימי וסכמי</button>
+      <button class="btn peach small" id="stop">⏹ לסיים ולסכם</button>
     </div>
   </div>
   <div id="lerr"></div>
@@ -210,7 +210,7 @@ function liveRun(id) {
       <div class="stream" id="stream" aria-live="polite"><p class="muted" id="wait">מחכה שמישהו ידבר. בפעם הראשונה מודל התמלול נטען וזה לוקח כמה דקות.</p></div></section>
     <aside class="side">
       <div class="card now"><h3>עכשיו מדברים על</h3><p id="now">עוד רגע יופיע כאן 🙂</p>
-        <button class="btn soft small" id="refresh" style="margin-top:12px">✨ רענני סיכום עכשיו</button></div>
+        <button class="btn soft small" id="refresh" style="margin-top:12px">✨ לרענן את הסיכום עכשיו</button></div>
       <div class="card" id="missed-card" hidden><h3>🙈 מה פספסת</h3><p class="missed-box" id="missed"></p></div>
       <div class="card"><h3>✦ הנקודות החשובות</h3><ul class="ticks" id="points"><li class="muted">יתמלא תוך כמה דקות</li></ul></div>
       <div class="card"><h3>❓ שאלות ומשימות</h3><ul class="ticks" id="qs"></ul></div>
@@ -230,7 +230,7 @@ function liveRun(id) {
     catch (e) { store.set('kashuv-live', null); toast('הפגישה החיה הסתיימה'); location.hash = '#/'; return; }
     $('#timer').textContent = fmt(s.elapsed);
     $('#orb').classList.toggle('idle', s.status !== 'listening');
-    $('#lstatus').innerHTML = s.status === 'listening' ? (s.rolling ? 'מעדכנת סיכום<span class="dots"></span>' : 'מקשיבה') : s.status === 'error' ? 'שגיאה' : 'מתחברת לשמע<span class="dots"></span>';
+    $('#lstatus').innerHTML = s.status === 'listening' ? (s.rolling ? 'מעדכן סיכום<span class="dots"></span>' : 'מקשיב') : s.status === 'error' ? 'שגיאה' : 'מתחבר לשמע<span class="dots"></span>';
     const lvl = Math.min(1, s.level * 12);
     $('#meter').querySelectorAll('b').forEach((b, i) => { b.style.height = Math.max(4, lvl * 26 * (0.5 + Math.abs(Math.sin(Date.now() / 200 + i)))) + 'px'; });
     $('#lerr').innerHTML = s.error ? `<p class="note warn">⚠️ ${esc(s.error)}</p>` : '';
@@ -259,15 +259,15 @@ function liveRun(id) {
   addEventListener('focus', () => { document.title = 'Kashuv'; }, { once: true });
 
   main.querySelectorAll('[data-missed]').forEach((b) => b.addEventListener('click', async () => {
-    $('#missed-card').hidden = false; $('#missed').innerHTML = 'מסכמת<span class="dots"></span>';
+    $('#missed-card').hidden = false; $('#missed').innerHTML = 'מסכם<span class="dots"></span>';
     try { $('#missed').textContent = (await api(`/api/live/${id}/missed`, { method: 'POST', body: { minutes: +b.dataset.missed } })).text; }
     catch (e) { $('#missed').textContent = e.message; }
   }));
   $('#mark').addEventListener('click', async () => {
     const note = prompt('מה חשוב פה? (אפשר להשאיר ריק)') ?? '';
-    await api(`/api/live/${id}/mark`, { method: 'POST', body: { note } }); toast('⭐ סימנתי את הרגע');
+    await api(`/api/live/${id}/mark`, { method: 'POST', body: { note } }); toast('⭐ הרגע סומן');
   });
-  $('#refresh').addEventListener('click', () => { api(`/api/live/${id}/refresh`, { method: 'POST' }); toast('✨ מעדכנת את הסיכום'); });
+  $('#refresh').addEventListener('click', () => { api(`/api/live/${id}/refresh`, { method: 'POST' }); toast('✨ מעדכן את הסיכום'); });
   $('#focus').addEventListener('click', (e) => {
     const on = document.body.classList.toggle('focus'); e.currentTarget.setAttribute('aria-pressed', String(on));
     toast(on ? '🎯 מצב ריכוז: רק מה שחשוב' : 'חזרנו לתצוגה המלאה');
@@ -288,7 +288,7 @@ async function summaryView(id) {
   const has = (a) => Array.isArray(a) && a.length;
   const tabs = [
     ['sum', '📒 סיכום'], has(m.concepts) && ['con', '💡 מושגים'], (has(m.tasks) || has(m.questions)) && ['todo', '✅ משימות ושאלות'],
-    has(m.quiz) && ['quiz', '🧠 תרגול'], (has(m.timeline) || has(s.marks)) && ['tl', '🕒 ציר זמן'], ['tr', '📝 תמלול'], ['ask', '💬 שאלי את ההקלטה'],
+    has(m.quiz) && ['quiz', '🧠 תרגול'], (has(m.timeline) || has(s.marks)) && ['tl', '🕒 ציר זמן'], ['tr', '📝 תמלול'], ['ask', '💬 לשאול את ההקלטה'],
   ].filter(Boolean);
   const titleOf = Object.fromEntries(tabs);
 
@@ -328,7 +328,7 @@ async function summaryView(id) {
     <div class="card pop"><h3>✅ משימות</h3><ul class="todo">${(m.tasks || []).map((t, i) => `<li><label><input type="checkbox" data-todo="${i}"><span>${esc(t)}</span></label></li>`).join('') || '<li class="muted">לא הוזכרו משימות</li>'}</ul></div>
     <div class="card pop" style="--i:1"><h3>❓ שאלות שעלו</h3><ul class="ticks">${(m.questions || []).map((q) => `<li>${esc(q)}</li>`).join('') || '<li class="muted">לא עלו שאלות</li>'}</ul></div>
   </div></section>` : ''}
-  ${has(m.quiz) ? `<section class="panel" id="p-quiz" role="tabpanel" data-title="תרגול" hidden><p class="muted no-print">לחצי על כרטיס כדי לראות את התשובה.</p><div class="cards">${m.quiz.map((q, i) => `
+  ${has(m.quiz) ? `<section class="panel" id="p-quiz" role="tabpanel" data-title="תרגול" hidden><p class="muted no-print">לוחצים על כרטיס כדי לראות את התשובה.</p><div class="cards">${m.quiz.map((q, i) => `
     <button class="flip pop" style="--i:${i}" aria-label="שאלה ${i + 1}"><div class="in"><div class="f"><small>שאלה ${i + 1}</small>${esc(q.q)}</div><div class="b"><small>תשובה</small>${esc(q.a)}</div></div></button>`).join('')}</div></section>` : ''}
   ${titleOf.tl ? `<section class="panel" id="p-tl" role="tabpanel" data-title="ציר זמן" hidden><div class="card"><ol class="tl">
     ${[...(m.timeline || []).map((t) => ({ sec: toSec(t.time), title: t.title, star: false })), ...(s.marks || []).map((k) => ({ sec: k.t, title: k.note || 'רגע חשוב', star: true }))]
@@ -339,7 +339,7 @@ async function summaryView(id) {
     <div class="transcript" id="tr"></div></div></section>
   <section class="panel no-print" id="p-ask" role="tabpanel" data-title="שאלות" hidden><div class="card chat">
     <div class="chat" id="chat"><div class="bubble ai">היי! אפשר לשאול אותי כל דבר על ההקלטה, למשל "מה המרצה אמר על המבחן?" 🙂</div></div>
-    <form class="ask-row" id="askf"><input id="askq" placeholder="השאלה שלך" aria-label="השאלה שלך" required><button class="btn lilac">שלחי</button></form>
+    <form class="ask-row" id="askf"><input id="askq" placeholder="השאלה שלך" aria-label="השאלה שלך" required><button class="btn lilac">שליחה</button></form>
   </div></section>`;
 
   // tabs
@@ -377,7 +377,7 @@ async function summaryView(id) {
   $('#askf').addEventListener('submit', async (e) => {
     e.preventDefault();
     const q = $('#askq').value.trim(); if (!q) return; $('#askq').value = '';
-    $('#chat').insertAdjacentHTML('beforeend', `<div class="bubble me">${esc(q)}</div><div class="bubble ai" id="pending">חושבת<span class="dots"></span></div>`);
+    $('#chat').insertAdjacentHTML('beforeend', `<div class="bubble me">${esc(q)}</div><div class="bubble ai" id="pending">חושב<span class="dots"></span></div>`);
     try { $('#pending').textContent = (await api(`/api/sessions/${id}/ask`, { method: 'POST', body: { q } })).answer; }
     catch (err) { $('#pending').textContent = err.message; }
     $('#pending').removeAttribute('id');

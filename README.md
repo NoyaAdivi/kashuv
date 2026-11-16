@@ -73,6 +73,28 @@
   </tr>
 </table>
 
+<a name="app"></a>
+<h3 align="center">📲 App and FAQ <sub><sup>new</sup></sub></h3>
+<p align="center">Kashuv installs as a real app with its own icon, and the site answers common questions by topic.</p>
+
+<table>
+  <tr valign="top">
+    <td width="50%">
+      <ul>
+        <li><b>📲 Installable app (PWA):</b> its own icon and window on phone and desktop, named just Kashuv</li>
+        <li><b>⚡ Works offline</b> after the first visit, powered by a service worker</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <ul>
+        <li><b>❓ FAQ by topic:</b> filter chips, search with highlighting and smooth animations</li>
+        <li><b>🔗 Built by Noya Adivi</b> with a LinkedIn link at the bottom of every page</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+
 <a name="see-it-in-action"></a>
 <p align="center"><a href="#how-it-works"><img src="docs/readme/screens-en.svg" width="100%" alt="See it in action"></a></p>
 

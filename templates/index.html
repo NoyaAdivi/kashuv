@@ -4,8 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kashuv</title>
-  <meta name="description" content="תמלול זומים, עזרה להתרכז וסיכומים מטורפים. חינם ובמחשב שלך.">
+  <meta name="description" content="תמלול זומים, עזרה להתרכז וסיכומים מסודרים. חינם ובמחשב שלך.">
   <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png">
+  <meta name="application-name" content="Kashuv">
+  <meta name="apple-mobile-web-app-title" content="Kashuv">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FFF4EF">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,12 +49,12 @@
 
   <footer class="site-foot">
     <div class="foot-brand"><img src="/static/logo.svg" alt="" width="28" height="28"> kashuv</div>
-    <p class="foot-note">הכל רץ במחשב שלך. שום הקלטה לא עולה לאינטרנט. ספרי למשתתפים שאת מקליטה.</p>
+    <p class="foot-note">הכל רץ במחשב שלך. שום הקלטה לא עולה לאינטרנט. חשוב לספר למשתתפים שמקליטים.</p>
     <p class="foot-credit">
       <span>נבנה על ידי</span>
-      <a class="foot-name" href="https://www.linkedin.com/in/noya-adivi" target="_blank" rel="noopener noreferrer" aria-label="נויה בלינקדאין">
+      <a class="foot-name" href="https://www.linkedin.com/in/noya-adivi" target="_blank" rel="noopener noreferrer" aria-label="נויה אדיבי בלינקדאין">
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></svg>
-        נויה
+        נויה אדיבי
       </a>
     </p>
   </footer>
@@ -72,5 +80,7 @@
 
   <script src="/static/a11y.js"></script>
   <script src="/static/app.js"></script>
+  <script src="/static/faq.js" defer></script>
+  <script src="/static/noya-app.js" data-sw="/sw.js" data-repo="https://github.com/NoyaAdivi/kashuv" data-home-only defer></script>
 </body>
 </html>
