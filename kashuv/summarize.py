@@ -10,6 +10,19 @@ STYLE = ("את עוזרת סיכומים מעולה לסטודנטים. כתבי
          "אם ההרצאה באנגלית, סכמי בעברית והשאירי מונחים מקצועיים גם באנגלית בסוגריים. "
          "לעולם אל תשתמשי בקו מפריד ארוך. החזירי JSON תקין בלבד.")
 
+STYLE_EN = ("You are an excellent note taker for students. Write in clear, accurate English and never invent anything "
+            "that was not said. Never use long dashes. Return valid JSON only.")
+EN_TAIL = "\n\nWrite every value in English only."
+
+
+def style(lang):
+    return STYLE_EN if lang == "en" else STYLE
+
+
+def tail(lang):
+    return EN_TAIL if lang == "en" else ""
+
+
 NOTES_SCHEMA = """{"points": ["נקודה חשובה"], "concepts": [{"term": "מונח", "explain": "הסבר קצר"}],
 "tasks": ["משימה או מטלה שהוזכרה"], "questions": ["שאלה שעלתה"], "topics": [{"time": "12:30", "title": "נושא"}]}"""
 
@@ -78,7 +91,7 @@ def _chunks(text):
         yield "\n".join(buf)
 
 
-def summarize(segments, on_progress=None):
+def summarize(segments, on_progress=None, lang="he"):
     text = transcript_text(segments)
     if not text.strip():
         return {"title": "לא זוהה דיבור", "emoji": "🤫", "tldr": "לא נמצא דיבור בהקלטה.", "sections": []}
@@ -88,14 +101,14 @@ def summarize(segments, on_progress=None):
     else:
         notes = []
         for i, part in enumerate(parts):
-            n = chat(STYLE, f"זה חלק {i + 1} מתוך {len(parts)} של תמלול. הוציאי ממנו הערות במבנה:\n{NOTES_SCHEMA}\n\nתמלול:\n{part}")
+            n = chat(style(lang), f"זה חלק {i + 1} מתוך {len(parts)} של תמלול. הוציאי ממנו הערות במבנה:\n{NOTES_SCHEMA}\n\nתמלול:\n{part}{tail(lang)}")
             notes.append(n)
             if on_progress:
                 on_progress((i + 1) / (len(parts) + 1))
         source = "הערות מכל חלקי ההרצאה לפי הסדר:\n" + json.dumps(notes, ensure_ascii=False)
-    result = chat(STYLE, "בני סיכום מעולה, מסודר ומעמיק ברמה של הסטודנט הכי טוב בכיתה. "
+    result = chat(style(lang), "בני סיכום מעולה, מסודר ומעמיק ברמה של הסטודנט הכי טוב בכיתה. "
                          "4 עד 8 חלקים, 5 עד 10 שאלות תרגול, ציר זמן לפי השעות שבתמלול. "
-                         f"המבנה:\n{FINAL_SCHEMA}\n\n{source}")
+                         f"המבנה:\n{FINAL_SCHEMA}\n\n{source}{tail(lang)}")
     return clean(result)
 
 
@@ -109,22 +122,22 @@ def clean(s):
     return out
 
 
-def live_update(previous, new_text):
+def live_update(previous, new_text, lang="he"):
     """Short rolling summary during a live meeting."""
-    return chat(STYLE, "את עוקבת אחרי זום בזמן אמת. עדכני את הסיכום החי לפי הקטע החדש. "
+    return chat(style(lang), "את עוקבת אחרי זום בזמן אמת. עדכני את הסיכום החי לפי הקטע החדש. "
                        'מבנה: {"now": "על מה מדברים עכשיו במשפט אחד", "points": ["עד 8 נקודות חשובות מכל הפגישה"], '
                        '"questions": ["שאלות או משימות שעלו"]}\n\n'
-                       f"הסיכום עד עכשיו:\n{json.dumps(previous, ensure_ascii=False)}\n\nקטע חדש:\n{new_text}", timeout=300)
+                       f"הסיכום עד עכשיו:\n{json.dumps(previous, ensure_ascii=False)}\n\nקטע חדש:\n{new_text}{tail(lang)}", timeout=300)
 
 
-def missed(text, minutes):
-    return chat(STYLE.replace("החזירי JSON תקין בלבד.", ""),
+def missed(text, minutes, lang="he"):
+    return chat(style(lang).replace("החזירי JSON תקין בלבד.", "").replace(" Return valid JSON only.", ""),
                 f"סכמי בשלוש עד חמש נקודות קצרות מה נאמר ב-{minutes} הדקות האחרונות, כדי שמי שהתפזר יחזור מהר לעניינים. "
-                f"כתבי כל נקודה בשורה שמתחילה ב-•\n\n{text}", json_mode=False, timeout=300)
+                f"כתבי כל נקודה בשורה שמתחילה ב-•\n\n{text}{tail(lang)}", json_mode=False, timeout=300)
 
 
-def ask(segments, question):
+def ask(segments, question, lang="he"):
     text = transcript_text(segments)[-24000:]
-    return chat(STYLE.replace("החזירי JSON תקין בלבד.", ""),
-                f"עני על השאלה רק לפי התמלול. אם התשובה לא נאמרה, תגידי את זה. צייני זמן [mm:ss] כשאפשר.\n\nשאלה: {question}\n\nתמלול:\n{text}",
+    return chat(style(lang).replace("החזירי JSON תקין בלבד.", "").replace(" Return valid JSON only.", ""),
+                f"עני על השאלה רק לפי התמלול. אם התשובה לא נאמרה, תגידי את זה. צייני זמן [mm:ss] כשאפשר.\n\nשאלה: {question}\n\nתמלול:\n{text}{tail(lang)}",
                 json_mode=False, timeout=300)

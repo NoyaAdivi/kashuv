@@ -38,7 +38,7 @@ def finish(job, session):
     """Summarize a session that already has segments, then save it."""
     job.update(status="summarizing", step="כותבת סיכום מטורף", progress=0.0)
     storage.save(session)
-    session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=p))
+    session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=p), session.get("lang", "he"))
     storage.save(session)
     job["session"] = session["id"]
 
@@ -46,19 +46,6 @@ def finish(job, session):
 @app.get("/")
 def index():
     return render_template("index.html")
-
-
-# installable app: the service worker must live at the root so it can control every page
-@app.get("/sw.js")
-def service_worker():
-    res = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
-    res.headers["Cache-Control"] = "no-cache"
-    return res
-
-
-@app.get("/manifest.webmanifest")
-def manifest():
-    return send_from_directory(app.static_folder, "manifest.webmanifest", mimetype="application/manifest+json")
 
 
 @app.get("/api/health")
@@ -127,7 +114,7 @@ def ask(sid):
     if not q:
         return jsonify(error="empty"), 400
     try:
-        return jsonify(answer=summarize.ask(s["segments"], q))
+        return jsonify(answer=summarize.ask(s["segments"], q, s.get("lang", "he")))
     except Exception as e:
         return jsonify(error=f"Ollama לא זמין: {e}"), 503
 
@@ -156,7 +143,7 @@ def live_missed(sid):
     if not text.strip():
         return jsonify(text="עוד לא נאמר כלום בדקות האלה 🙂")
     try:
-        return jsonify(text=summarize.missed(text, minutes))
+        return jsonify(text=summarize.missed(text, minutes, lv.lang))
     except Exception as e:
         return jsonify(error=f"Ollama לא זמין: {e}"), 503
 

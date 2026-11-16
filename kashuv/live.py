@@ -117,7 +117,7 @@ class Live:
 
         def run():
             try:
-                s = summarize.live_update(self.summary, text)
+                s = summarize.live_update(self.summary, text, self.lang)
                 if isinstance(s, dict) and s:
                     self.summary = {"now": str(s.get("now", "")), "points": list(s.get("points") or [])[:8],
                                     "questions": list(s.get("questions") or [])[:8]}
