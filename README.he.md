@@ -1,12 +1,13 @@
 <div dir="rtl">
 
 <p align="center">
-  <a href="#run-locally"><img src="docs/readme/banner-he.svg" width="100%" alt="Kashuv: להיות קשובים בכל זום עם תמלול חי, עזרה להתרכז וסיכומים חכמים, בחינם ובמחשב שלכם"></a>
+  <a href="#run-locally"><img src="docs/readme/banner-he.svg" width="100%" alt="Kashuv: להיות קשובה בכל זום עם תמלול חי, עזרה להתרכז וסיכומים מטורפים, בחינם ובמחשב שלך"></a>
 </p>
 
 <p align="center"><a href="README.md"><img src="docs/readme/lang-en.svg" height="44" alt="Read in English"></a></p>
 
 <p align="center">
+  <a href="https://noyaadivi.github.io/kashuv/"><img src="https://img.shields.io/badge/לדמו_באתר-FBD5E0?style=for-the-badge&logo=googlechrome&logoColor=A03A5C" alt="לדמו באתר"></a>
   <a href="#run-locally"><img src="https://img.shields.io/badge/התחלה_מהירה-FFD5C9?style=for-the-badge&logo=windows&logoColor=A8483A" alt="התחלה מהירה"></a>
   <a href="https://github.com/NoyaAdivi/kashuv/archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/הורדת_ZIP-D9F3E7?style=for-the-badge&logo=github&logoColor=1F7350" alt="הורדת ZIP"></a>
   <a href="#how-it-works"><img src="https://img.shields.io/badge/איך_זה_עובד-DAD5FF?style=for-the-badge&logo=databricks&logoColor=5548C8" alt="איך זה עובד"></a>
@@ -19,12 +20,12 @@
   <img src="https://img.shields.io/badge/cost-%240-FBD5E0?labelColor=A03A5C" alt="עלות: 0">
 </p>
 
-<h3 align="center">להיות קשובים בכל זום, ולא לאבד את החוט אף פעם.</h3>
+<h3 align="center">להיות קשובה בכל זום, הרצאה ושיעור, ולא לאבד את החוט אף פעם.</h3>
 
 <p align="center">
-  Kashuv מקשיב לפגישות יחד איתכם, מתמלל בזמן אמת,<br>
-  מתריע כשמישהו אומר את השם שלכם, והופך כל הרצאה ל<b>סיכום שבאמת אפשר ללמוד ממנו</b>.<br>
-  הכל רץ במחשב שלכם. בלי מנויים, בלי ענן, בלי עלות.
+  Kashuv מקשיבה יחד איתך, אונליין או בכיתה, מתמללת בזמן אמת,<br>
+  מתריעה כשמישהו אומר את השם שלך, והופכת כל הרצאה ל<b>סיכום שבאמת אפשר ללמוד ממנו</b>.<br>
+  הכל רץ במחשב שלך. בלי מנויים, בלי ענן, בלי עלות.
 </p>
 
 <table align="center">
@@ -46,19 +47,20 @@
 <table dir="rtl">
   <tr valign="top">
     <td valign="top" width="33%">
-      <p><b>🎧 זום חי</b></p>
+      <p><b>🎧 האזנה חיה</b></p>
       <ul>
-        <li><b>שומע את מה שהמחשב משמיע:</b> אפליקציית זום, זום בדפדפן, Meet, Teams</li>
-        <li><b>תמלול חי</b> כל כמה שניות, ואם רוצים גם המיקרופון שלכם</li>
+        <li><b>💻 אונליין:</b> אפליקציית זום, זום בדפדפן, Meet, Teams, ברמקולים, באוזניות חוטיות או בלוטות'</li>
+        <li><b>🎓 בכיתה:</b> מקליטה את ההרצאה דרך המיקרופון של המחשב</li>
+        <li><b>תמלול חי</b> כל כמה שניות</li>
         <li><b>סיכום מתעדכן:</b> "על מה מדברים עכשיו"</li>
-        <li><b>שומר את ההקלטה</b> כקובץ WAV</li>
+        <li><b>שומרת את ההקלטה</b> כקובץ WAV</li>
       </ul>
     </td>
     <td valign="top" width="33%">
       <p><b>🎯 עזרה להתרכז</b></p>
       <ul>
         <li><b>🙈 מה פספסתי?</b> 2, 5 או 10 הדקות האחרונות בלחיצה</li>
-        <li><b>📣 התראת שם:</b> צליל והדגשה כשקוראים לכם</li>
+        <li><b>📣 התראת שם:</b> צליל והדגשה כשקוראים לך</li>
         <li><b>⭐ רגעים חשובים</b> שאפשר לסמן עם הערה</li>
         <li><b>מצב ריכוז</b> שמשאיר רק את העיקר</li>
       </ul>
@@ -69,7 +71,7 @@
         <li><b>כל הקלטה:</b> mp4, m4a, mp3, wav ועוד</li>
         <li><b>תקציר, חלקים, מה חשוב למבחן,</b> מושגים, משימות, ציר זמן וכרטיסיות תרגול</li>
         <li><b>תמלול לחיץ</b> שעוקב אחרי ההקלטה, עם חיפוש</li>
-        <li><b>💬 שאלו את ההקלטה</b> כל שאלה, וייצוא ל-PDF או Markdown</li>
+        <li><b>💬 שאלי את ההקלטה</b> כל שאלה, וייצוא ל-PDF או Markdown</li>
       </ul>
     </td>
   </tr>
@@ -91,7 +93,8 @@
 
 ```mermaid
 flowchart LR
-  A([🎧 הקול של הזום<br/>אפליקציה · דפדפן · Meet]) --> B[הקלטת loopback<br/>soundcard]
+  A([🎧 הקול של הזום<br/>רמקולים · אוזניות]) --> B[הקלטה מכל ההתקנים<br/>soundcard]
+  M([🎓 מיקרופון בכיתה]) --> B
   F([🎬 קובץ הקלטה<br/>mp4 · mp3 · wav]) --> C
   B -->|קטעים של 10 שניות| C[faster-whisper<br/>מודל העברית של ivrit.ai]
   C --> D([📝 תמלול חי])
@@ -100,6 +103,7 @@ flowchart LR
   D -->|כשמסיימים| H([📒 סיכום מלא<br/>מושגים · משימות · תרגול])
   style A fill:#E8E4FF,stroke:#6F60F0,color:#2C2668
   style F fill:#E8E4FF,stroke:#6F60F0,color:#2C2668
+  style M fill:#E8E4FF,stroke:#6F60F0,color:#2C2668
   style B fill:#FFE6DE,stroke:#E36E57,color:#2C2668
   style C fill:#FFE6DE,stroke:#E36E57,color:#2C2668
   style D fill:#D9F3E7,stroke:#1F7350,color:#1F4D38
@@ -140,13 +144,16 @@ flowchart LR
    ```bash
    ollama pull gemma3:4b
    ```
-3. לחיצה כפולה על **`start.bat`**. בפעם הראשונה נוצרת סביבה וירטואלית, הכל מותקן ומודל הדיבור בעברית יורד (בערך 1.6GB). אחר כך Kashuv נפתח בכתובת `http://localhost:5170`.
+> [!NOTE]
+> [הדמו באתר](https://noyaadivi.github.io/kashuv/) רץ ב-GitHub Pages עם נתונים לדוגמה, כדי שאפשר יהיה ללחוץ על כל המסכים. הקלטה ותמלול אמיתיים עובדים באפליקציה המקומית.
+
+3. לחיצה כפולה על **`start.bat`**. בפעם הראשונה נוצרת סביבה וירטואלית, הכל מותקן ומודל הדיבור בעברית יורד (בערך 1.6GB). אחר כך Kashuv נפתחת בכתובת `http://localhost:5170`.
 
 > [!TIP]
 > מחשב איטי? להגדיר `KASHUV_WHISPER=small`. מחשב חזק? לנסות `KASHUV_LLM=qwen2.5:7b`. כל ההגדרות נמצאות ב-[`kashuv/config.py`](kashuv/config.py).
 
 > [!NOTE]
-> זום חי מקליט את הרמקול הראשי עם WASAPI loopback ב-Windows. ב-Mac צריך התקן loopback כמו BlackHole.
+> מצב אונליין מקליט את כל התקני השמע עם WASAPI loopback ב-Windows, ולכן עובד גם עם אוזניות. מצב כיתה משתמש במיקרופון. ב-Mac צריך התקן loopback כמו BlackHole.
 
 <details>
 <summary><b>📂 מבנה הפרויקט</b></summary>
@@ -170,7 +177,7 @@ flowchart LR
 <details>
 <summary><b>🔒 פרטיות</b></summary>
 <br>
-הקול, התמלולים והסיכומים לא יוצאים מהמחשב שלכם. הם נשמרים בתיקייה המקומית <code>data/</code>, שלא עולה ל-git. תמיד לספר למשתתפים שמקליטים.
+הקול, התמלולים והסיכומים לא יוצאים מהמחשב שלך. הם נשמרים בתיקייה המקומית <code>data/</code>, שלא עולה ל-git. תמיד לספר למשתתפים שמקליטים.
 </details>
 
 <a name="contact"></a>

@@ -48,14 +48,6 @@ def index():
     return render_template("index.html")
 
 
-@app.get("/sw.js")
-def service_worker():
-    # served from the root so the app can be installed and work offline
-    res = send_from_directory(app.static_folder, "sw.js", mimetype="application/javascript")
-    res.headers["Cache-Control"] = "no-cache"
-    return res
-
-
 @app.get("/api/health")
 def health():
     return jsonify(ollama=summarize.ollama_ok(), whisper=config.WHISPER_MODEL, loaded=transcribe.is_loaded())
@@ -131,7 +123,7 @@ def ask(sid):
 def live_start():
     body = request.json or {}
     sid = storage.new_id()
-    lives[sid] = Live(sid, body.get("lang", "he"), body.get("name", ""), bool(body.get("mic")))
+    lives[sid] = Live(sid, body.get("lang", "he"), body.get("name", ""), body.get("source", "computer"))
     lives[sid].title = (body.get("title") or "").strip()
     threading.Thread(target=transcribe.get_model, daemon=True).start()
     return jsonify(id=sid)
@@ -178,7 +170,7 @@ def live_stop(sid):
     def work(job):
         job.update(status="transcribing", step="מסיימת לתמלל את השניות האחרונות")
         data = lv.stop()
-        session = {"id": sid, "kind": "live", "name": lv.title or time.strftime("זום %d.%m %H:%M"),
+        session = {"id": sid, "kind": "live", "name": lv.title or time.strftime(("Class " if lv.source == "class" else "Zoom ") + "%d.%m %H:%M"),
                    "created": lv.started, "lang": lv.lang, **data}
         finish(job, session)
     run_job(jid, work)

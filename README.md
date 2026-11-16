@@ -18,10 +18,10 @@
   <img src="https://img.shields.io/badge/cost-%240-FBD5E0?labelColor=A03A5C" alt="Cost: $0">
 </p>
 
-<h3 align="center">Stay focused in every Zoom. Never lose the thread again.</h3>
+<h3 align="center">Stay focused in every Zoom, lecture and class. Never lose the thread again.</h3>
 
 <p align="center">
-  Kashuv ("attentive" in Hebrew) listens to your meetings with you, transcribes them live,<br>
+  Kashuv ("attentive" in Hebrew) listens with you, online or in the classroom, transcribes live,<br>
   tells you when someone says your name, and turns every lecture into <b>notes worth studying from</b>.<br>
   Everything runs on your own computer. No subscriptions, no cloud, no cost.
 </p>
@@ -45,10 +45,11 @@
 <table>
   <tr valign="top">
     <td valign="top" width="33%">
-      <p><b>🎧 Live Zoom mode</b></p>
+      <p><b>🎧 Live listening</b></p>
       <ul>
-        <li><b>Hears what your computer plays:</b> the Zoom app, Zoom in the browser, Meet, Teams</li>
-        <li><b>Live transcript</b> every few seconds, plus your own mic if you want</li>
+        <li><b>💻 Online:</b> the Zoom app, Zoom in the browser, Meet, Teams, with speakers, wired or Bluetooth headphones</li>
+        <li><b>🎓 In class:</b> records the lecture through your laptop microphone</li>
+        <li><b>Live transcript</b> every few seconds</li>
         <li><b>Rolling summary:</b> "what are they talking about right now"</li>
         <li><b>Saves the recording</b> as a WAV file</li>
       </ul>
@@ -90,7 +91,8 @@
 
 ```mermaid
 flowchart LR
-  A([🎧 Zoom audio<br/>app · browser · Meet]) --> B[Loopback capture<br/>soundcard]
+  A([🎧 Zoom audio<br/>speakers · headphones]) --> B[Capture every device<br/>soundcard]
+  M([🎓 Class microphone]) --> B
   F([🎬 Recording file<br/>mp4 · mp3 · wav]) --> C
   B -->|10 s chunks| C[faster-whisper<br/>ivrit.ai Hebrew model]
   C --> D([📝 Live transcript])
@@ -99,6 +101,7 @@ flowchart LR
   D -->|when you stop| H([📒 Full summary<br/>concepts · tasks · quiz])
   style A fill:#E8E4FF,stroke:#6F60F0,color:#2C2668
   style F fill:#E8E4FF,stroke:#6F60F0,color:#2C2668
+  style M fill:#E8E4FF,stroke:#6F60F0,color:#2C2668
   style B fill:#FFE6DE,stroke:#E36E57,color:#2C2668
   style C fill:#FFE6DE,stroke:#E36E57,color:#2C2668
   style D fill:#D9F3E7,stroke:#1F7350,color:#1F4D38
@@ -148,7 +151,7 @@ flowchart LR
 > Slow laptop? Set `KASHUV_WHISPER=small`. Strong PC? Try `KASHUV_LLM=qwen2.5:7b`. Every setting lives in [`kashuv/config.py`](kashuv/config.py).
 
 > [!NOTE]
-> Live mode records the default speaker with WASAPI loopback on Windows. On a Mac you need a loopback device such as BlackHole.
+> Online mode records every output device with WASAPI loopback on Windows, so it works with headphones too. Class mode uses the default microphone. On a Mac you need a loopback device such as BlackHole.
 
 <details>
 <summary><b>📂 Project structure</b></summary>

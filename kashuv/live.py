@@ -1,10 +1,15 @@
-"""Live mode: records what your computer plays (Zoom app, Zoom in the browser, Meet, YouTube...),
-transcribes it every few seconds and keeps a rolling summary. Optional: your own microphone too."""
+"""Live mode, three sources:
+- "computer": what your computer plays (Zoom app, Zoom in the browser, Meet, Teams). Every output device is
+  captured, so it works with speakers, wired headphones and Bluetooth headphones alike.
+- "class": the microphone, for a lecture or lesson in the room.
+- "both": computer sound and microphone mixed (a Zoom where you also talk).
+Each device is read in its own thread, so a silent device never blocks the others."""
 import sys
 import threading
 import time
 import wave
 import queue
+import collections
 import numpy as np
 from . import config, summarize
 from .transcribe import transcribe_chunk
@@ -20,8 +25,9 @@ def _to16k(block):
 
 
 class Live:
-    def __init__(self, sid, lang="he", name="", mic=False):
-        self.id, self.lang, self.mic = sid, lang, mic
+    def __init__(self, sid, lang="he", name="", source="computer"):
+        self.id, self.lang = sid, lang
+        self.source = source if source in ("computer", "class", "both") else "computer"
         self.names = [w for w in (name or "").replace(",", " ").split() if len(w) > 1]
         self.segments, self.alerts, self.marks = [], [], []
         self.summary = {"now": "", "points": [], "questions": []}
@@ -44,44 +50,74 @@ class Live:
     def elapsed(self):
         return time.time() - self.started
 
-    def _capture(self):
-        recs = []
+    def _device_reader(self, mic, buf):
+        """Reads one device into its own buffer until the session stops."""
         try:
             if sys.platform == "win32":
                 import ctypes
                 ctypes.windll.ole32.CoInitializeEx(None, 0)
-            import soundcard as sc
-            speaker = sc.default_speaker()
-            loop = sc.get_microphone(id=str(speaker.name), include_loopback=True)
-            recs.append(loop.recorder(samplerate=RATE))
-            if self.mic:
-                recs.append(sc.default_microphone().recorder(samplerate=RATE))
-            for r in recs:
-                r.__enter__()
-            self.status = "listening"
-            need, buf, have = OUT * config.LIVE_CHUNK_SECONDS, [], 0
-            while self.running:
-                parts = [_to16k(r.record(numframes=RATE // 2)) for r in recs]
-                n = min(len(p) for p in parts)
-                block = np.clip(sum(p[:n] for p in parts), -1, 1)
-                self.level = float(np.sqrt(np.mean(block ** 2))) if n else 0.0
-                self._wav.writeframes((block * 32767).astype(np.int16).tobytes())
-                buf.append(block)
-                have += n
-                if have >= need:
-                    self._q.put((self.elapsed() - have / OUT, np.concatenate(buf)))
-                    buf, have = [], 0
-            if have > OUT:
-                self._q.put((self.elapsed() - have / OUT, np.concatenate(buf)))
-        except Exception as e:  # no sound card, missing package, Mac without BlackHole...
-            self.error = f"בעיה בהקלטת הקול: {e}"
-            self.status = "error"
-        finally:
-            for r in recs:
+            with mic.recorder(samplerate=RATE) as rec:
+                while self.running:
+                    buf.append(_to16k(rec.record(numframes=RATE // 4)))
+        except Exception:
+            pass  # a device that cannot be recorded (unplugged, in use) is simply skipped
+
+    def _devices(self):
+        if sys.platform == "win32":
+            import ctypes
+            ctypes.windll.ole32.CoInitializeEx(None, 0)
+        import soundcard as sc
+        devs = []
+        if self.source in ("computer", "both"):
+            for spk in sc.all_speakers():  # speakers, headphones, Bluetooth: whatever Zoom plays to
                 try:
-                    r.__exit__(None, None, None)
+                    devs.append(sc.get_microphone(id=str(spk.id), include_loopback=True))
                 except Exception:
                     pass
+        if self.source in ("class", "both"):
+            devs.append(sc.default_microphone())
+        if not devs:
+            raise RuntimeError("לא נמצא התקן שמע" if self.lang != "en" else "No audio device found")
+        return devs
+
+    def _capture(self):
+        try:
+            bufs = []
+            for d in self._devices():
+                b = collections.deque()
+                bufs.append(b)
+                threading.Thread(target=self._device_reader, args=(d, b), daemon=True).start()
+            self.status = "listening"
+            need, chunk, have = OUT * config.LIVE_CHUNK_SECONDS, [], 0
+            step = OUT // 2
+            next_t = time.time()
+            while self.running:
+                next_t += 0.5
+                time.sleep(max(0, next_t - time.time()))
+                parts = []
+                for b in bufs:
+                    got = []
+                    while b:
+                        got.append(b.popleft())
+                    parts.append(np.concatenate(got) if got else np.zeros(0, np.float32))
+                n = max([step] + [len(x) for x in parts])
+                block = np.zeros(n, np.float32)
+                for x in parts:
+                    block[:len(x)] += x
+                block = np.clip(block, -1, 1)
+                self.level = float(np.sqrt(np.mean(block ** 2)))
+                self._wav.writeframes((block * 32767).astype(np.int16).tobytes())
+                chunk.append(block)
+                have += n
+                if have >= need:
+                    self._q.put((self.elapsed() - have / OUT, np.concatenate(chunk)))
+                    chunk, have = [], 0
+            if have > OUT:
+                self._q.put((self.elapsed() - have / OUT, np.concatenate(chunk)))
+        except Exception as e:  # no sound card, missing package, Mac without BlackHole...
+            self.error = (f"Audio capture problem: {e}" if self.lang == "en" else f"בעיה בהקלטת הקול: {e}")
+            self.status = "error"
+        finally:
             self._q.put(None)
 
     def _work(self):
@@ -144,4 +180,4 @@ class Live:
         except Exception:
             pass
         return {"duration": round(self.elapsed()), "segments": self.segments, "marks": self.marks,
-                "audio": self.audio_name}
+                "audio": self.audio_name, "source": self.source}
