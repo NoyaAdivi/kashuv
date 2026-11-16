@@ -51,7 +51,7 @@
         <li><b>🎓 In class:</b> records the lecture through your laptop microphone</li>
         <li><b>Live transcript</b> every few seconds</li>
         <li><b>Rolling summary:</b> "what are they talking about right now"</li>
-        <li><b>Saves the recording</b> as a WAV file</li>
+        <li><b>💾 Auto-saves</b> every few seconds and keeps the recording as WAV</li>
       </ul>
     </td>
     <td valign="top" width="33%">
@@ -60,7 +60,7 @@
         <li><b>🙈 What did I miss?</b> The last 2, 5 or 10 minutes in one click</li>
         <li><b>📣 Name alert:</b> a sound and a highlight when you are called</li>
         <li><b>⭐ Important moments</b> you can bookmark with a note</li>
-        <li><b>Focus mode</b> that hides everything but the essentials</li>
+        <li><b>Focus mode</b> and <b>⌨️ shortcuts</b> (M, F, 1 / 2 / 3)</li>
       </ul>
     </td>
     <td valign="top" width="33%">
@@ -154,6 +154,16 @@ flowchart LR
 > Online mode records every output device with WASAPI loopback on Windows, so it works with headphones too. Class mode uses the default microphone. On a Mac you need a loopback device such as BlackHole.
 
 <details>
+<summary><b>🧪 Tests</b></summary>
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+The LLM and Whisper are replaced with fakes, so the suite needs no models and runs in under a second.
+</details>
+
+<details>
 <summary><b>📂 Project structure</b></summary>
 
 ```
@@ -166,6 +176,7 @@ flowchart LR
 │   └── storage.py      sessions as JSON files in data/
 ├── templates/          index.html
 ├── static/             app.js (router and views), a11y.js, style.css, logo.svg
+├── tests/              pytest suite with fake models (runs in under a second)
 ├── docs/               README images
 └── start.bat           one-click setup and start on Windows
 ```

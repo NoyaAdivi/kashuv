@@ -37,6 +37,7 @@ def new_job():
 def finish(job, session):
     """Summarize a session that already has segments, then save it."""
     job.update(status="summarizing", step="כותבת סיכום מטורף", progress=0.0)
+    session.pop("partial", None)
     storage.save(session)
     session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=p), session.get("lang", "he"))
     storage.save(session)
@@ -107,6 +108,19 @@ def resummarize(sid):
     return jsonify(job=jid)
 
 
+@app.post("/api/sessions/<sid>/rename")
+def rename(sid):
+    s = storage.load(sid) or abort(404)
+    title = (request.json or {}).get("title", "").strip()[:120]
+    if not title:
+        return jsonify(error="empty"), 400
+    s["name"] = title
+    if s.get("summary"):
+        s["summary"]["title"] = title
+    storage.save(s)
+    return jsonify(ok=True)
+
+
 @app.post("/api/sessions/<sid>/ask")
 def ask(sid):
     s = storage.load(sid) or abort(404)
@@ -123,8 +137,8 @@ def ask(sid):
 def live_start():
     body = request.json or {}
     sid = storage.new_id()
-    lives[sid] = Live(sid, body.get("lang", "he"), body.get("name", ""), body.get("source", "computer"))
-    lives[sid].title = (body.get("title") or "").strip()
+    lives[sid] = Live(sid, body.get("lang", "he"), body.get("name", ""), body.get("source", "computer"),
+                      (body.get("title") or "").strip())
     threading.Thread(target=transcribe.get_model, daemon=True).start()
     return jsonify(id=sid)
 
@@ -182,8 +196,16 @@ def media(name):
     return send_from_directory(config.MEDIA, name, conditional=True)
 
 
+def warm_up():
+    try:
+        transcribe.get_model()
+    except Exception as e:
+        print(f"  Speech model will load on first use ({e})")
+
+
 if __name__ == "__main__":
     url = f"http://localhost:{config.PORT}"
     print(f"\n  Kashuv is running at {url}\n")
     threading.Timer(1.2, lambda: webbrowser.open(url)).start()
+    threading.Thread(target=warm_up, daemon=True).start()  # warm up so the first lecture starts fast
     app.run(port=config.PORT, threaded=True)

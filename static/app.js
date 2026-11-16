@@ -164,7 +164,7 @@ function renderLib(el, items) {
   el.innerHTML = items.map((s, i) => `
     <a class="card pop" style="--i:${i}" href="#/s/${esc(s.id)}">
       <span class="emo">${esc(s.emoji)}</span>
-      <h3>${esc(s.title)}</h3>
+      <h3>${esc(s.title)}${s.partial ? ` <span class="chip" style="--c:var(--warn);--c-soft:var(--warn-soft)">${L('נשמר באמצע', 'Saved mid-way')}</span>` : ''}</h3>
       <p>${esc(s.tldr || L("בלי סיכום עדיין", "No summary yet"))}</p>
       <div class="chips"><span class="chip">${kindLabel(s)}</span><span class="chip" style="--c:var(--peach-deep);--c-soft:var(--peach-soft)">⏱ ${fmt(s.duration)}</span></div>
       <small class="muted">${dateHe(s.created)}</small>
@@ -228,6 +228,7 @@ function liveRun(id) {
       <button class="btn peach small" id="stop">${L("⏹ סיימי וסכמי", "⏹ Stop & summarize")}</button>
     </div>
   </div>
+  <p class="muted keys no-print">⌨️ ${L('קיצורים: M רגע חשוב · F מצב ריכוז · 1 / 2 / 3 מה פספסתי · נשמר אוטומטית כל כמה שניות', 'Shortcuts: M important moment · F focus mode · 1 / 2 / 3 what did I miss · auto-saved every few seconds')}</p>
   <div id="lerr"></div>
   <div class="live-grid">
     <section class="card stream-card"><h2 style="font-size:1.2rem;margin-bottom:10px">${L("📝 תמלול חי", "📝 Live transcript")}</h2>
@@ -244,7 +245,14 @@ function liveRun(id) {
   </div>`;
 
   let since = 0, alive = true, seenAlerts = 0, timerId;
-  cleanup = () => { alive = false; clearTimeout(timerId); document.title = 'Kashuv'; };
+  const keys = (e) => {
+    if (e.target.closest('input, textarea, select') || e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    const btn = k === 'm' || k === 'צ' ? '#mark' : k === 'f' || k === 'כ' ? '#focus' : { 1: '[data-missed="2"]', 2: '[data-missed="5"]', 3: '[data-missed="10"]' }[k];
+    if (btn && $(btn)) { e.preventDefault(); $(btn).click(); }
+  };
+  addEventListener('keydown', keys);
+  cleanup = () => { alive = false; clearTimeout(timerId); document.title = 'Kashuv'; removeEventListener('keydown', keys); };
   const list = (el, arr, render = esc) => { const h = arr.length ? arr.map((x) => `<li>${render(x)}</li>`).join('') : ''; if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } };
 
   const poll = async () => {
@@ -319,7 +327,7 @@ async function summaryView(id) {
   main.innerHTML = `
   <section class="card sum-hero pop">
     <span class="emo" aria-hidden="true">${esc(m.emoji || '📝')}</span>
-    <h1>${esc(m.title || s.name)}</h1>
+    <h1 id="title">${esc(m.title || s.name)} <button class="icon-btn rename no-print" id="rename" type="button" aria-label="${L('שינוי שם', 'Rename')}">✏️</button></h1>
     <div class="meta">
       <span class="chip">${kindLabel(s)}</span>
       <span class="chip" style="--c:var(--peach-deep);--c-soft:var(--peach-soft)">⏱ ${fmt(s.duration)}</span>
@@ -425,6 +433,11 @@ async function summaryView(id) {
     a.download = (m.title || s.name || 'kashuv') + '.md'; a.click(); URL.revokeObjectURL(a.href);
   });
   $('#copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(markdown()); toast(L('📋 הועתק','📋 Copied')); } catch (e) { toast(L('לא הצלחתי להעתיק','Could not copy')); } });
+  $('#rename').addEventListener('click', async () => {
+    const t = prompt(L('שם חדש לסיכום:', 'New name for this summary:'), m.title || s.name);
+    if (!t || !t.trim()) return;
+    try { await api(`/api/sessions/${id}/rename`, { method: 'POST', body: { title: t.trim() } }); toast(L('✏️ השם עודכן', '✏️ Renamed')); route(); } catch (e) { toast(e.message); }
+  });
   $('#again').addEventListener('click', async () => { const j = await api(`/api/sessions/${id}/resummarize`, { method: 'POST' }); watchJob(j.job, id); });
   $('#del').addEventListener('click', async () => {
     if (!confirm(L('למחוק את הסיכום וההקלטה לגמרי?','Delete this summary and recording for good?'))) return;

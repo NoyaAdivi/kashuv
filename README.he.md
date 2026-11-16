@@ -53,7 +53,7 @@
         <li><b>🎓 בכיתה:</b> מקליטה את ההרצאה דרך המיקרופון של המחשב</li>
         <li><b>תמלול חי</b> כל כמה שניות</li>
         <li><b>סיכום מתעדכן:</b> "על מה מדברים עכשיו"</li>
-        <li><b>שומרת את ההקלטה</b> כקובץ WAV</li>
+        <li><b>💾 שמירה אוטומטית</b> כל כמה שניות, וההקלטה נשמרת כ-WAV</li>
       </ul>
     </td>
     <td valign="top" width="33%">
@@ -62,7 +62,7 @@
         <li><b>🙈 מה פספסתי?</b> 2, 5 או 10 הדקות האחרונות בלחיצה</li>
         <li><b>📣 התראת שם:</b> צליל והדגשה כשקוראים לך</li>
         <li><b>⭐ רגעים חשובים</b> שאפשר לסמן עם הערה</li>
-        <li><b>מצב ריכוז</b> שמשאיר רק את העיקר</li>
+        <li><b>מצב ריכוז</b> ו-<b>⌨️ קיצורי מקלדת</b> (M, F, 1 / 2 / 3)</li>
       </ul>
     </td>
     <td valign="top" width="33%">
@@ -156,6 +156,16 @@ flowchart LR
 > מצב אונליין מקליט את כל התקני השמע עם WASAPI loopback ב-Windows, ולכן עובד גם עם אוזניות. מצב כיתה משתמש במיקרופון. ב-Mac צריך התקן loopback כמו BlackHole.
 
 <details>
+<summary><b>🧪 בדיקות</b></summary>
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+מודל השפה ו-Whisper מוחלפים במודלים מזויפים, אז הבדיקות לא צריכות מודלים ורצות בפחות משנייה.
+</details>
+
+<details>
 <summary><b>📂 מבנה הפרויקט</b></summary>
 
 ```
@@ -168,6 +178,7 @@ flowchart LR
 │   └── storage.py      פגישות כקבצי JSON בתיקייה data/
 ├── templates/          index.html
 ├── static/             app.js (ניתוב ותצוגות), a11y.js, style.css, logo.svg
+├── tests/              בדיקות pytest עם מודלים מזויפים (רצות בפחות משנייה)
 ├── docs/               התמונות של ה-README
 └── start.bat           התקנה והפעלה בלחיצה אחת ב-Windows
 ```

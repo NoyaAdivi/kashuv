@@ -11,7 +11,7 @@ import wave
 import queue
 import collections
 import numpy as np
-from . import config, summarize
+from . import config, summarize, storage
 from .transcribe import transcribe_chunk
 
 RATE = 48000  # what sound cards like
@@ -25,7 +25,8 @@ def _to16k(block):
 
 
 class Live:
-    def __init__(self, sid, lang="he", name="", source="computer"):
+    def __init__(self, sid, lang="he", name="", source="computer", title=""):
+        self.title = title
         self.id, self.lang = sid, lang
         self.source = source if source in ("computer", "class", "both") else "computer"
         self.names = [w for w in (name or "").replace(",", " ").split() if len(w) > 1]
@@ -139,9 +140,19 @@ class Live:
                 self._pending.append(f"[{summarize.fmt_time(seg['start'])}] {text}")
                 if any(n in text for n in self.names):
                     self.alerts.append({"t": seg["start"], "text": text})
+            self.autosave()
             if self._pending and not self._rolling and time.time() - self._last_roll > config.LIVE_SUMMARY_EVERY:
                 self.roll()
         self._done.set()
+
+    def autosave(self):
+        """Saves the transcript so far, so nothing is lost if the app or the computer closes mid lecture."""
+        try:
+            storage.save({"id": self.id, "kind": "live", "partial": True, "name": self.title or time.strftime("%d.%m %H:%M"),
+                          "created": self.started, "lang": self.lang, "source": self.source, "duration": round(self.elapsed()),
+                          "segments": self.segments, "marks": self.marks, "audio": self.audio_name})
+        except Exception:
+            pass
 
     def roll(self):
         """Refresh the live summary in the background so transcription never waits."""

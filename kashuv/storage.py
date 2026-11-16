@@ -42,7 +42,7 @@ def list_all():
         except ValueError:
             continue
         sm = s.get("summary") or {}
-        items.append({"id": s["id"], "title": sm.get("title") or s.get("name"), "emoji": sm.get("emoji", "📝"),
+        items.append({"id": s["id"], "partial": bool(s.get("partial")), "title": sm.get("title") or s.get("name"), "emoji": sm.get("emoji", "📝"),
                       "tldr": sm.get("tldr", ""), "created": s.get("created"), "kind": s.get("kind"), "source": s.get("source"),
                       "duration": s.get("duration", 0), "keywords": sm.get("keywords", [])[:4]})
     return items

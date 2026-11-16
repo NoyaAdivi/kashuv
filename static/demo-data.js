@@ -37,6 +37,7 @@
     if (kind === 'sessions') {
       if (method === 'DELETE') { deleted.add(id); return { ok: true }; }
       if (action === 'ask') { await wait(900); return { answer: T(lang, 'במצב ההדגמה אין מודל שפה, אבל באפליקציה המלאה התשובה נכתבת לפי התמלול עם זמנים, למשל: [10:30] המרצה אמר שרוטציה כפולה תהיה במבחן.', 'Demo mode has no language model, but in the full app the answer comes from the transcript with timestamps, for example: [10:30] the lecturer said double rotations will be on the exam.') }; }
+      if (action === 'rename') { const s = session(id); s.summary.title = body.title; s.name = body.title; return { ok: true }; }
       if (action === 'resummarize') { const jid = 'j' + Date.now(); jobs[jid] = { start: Date.now(), session: id }; return { job: jid }; }
       const s = session(id); if (!s) throw new Error('not found'); return s;
     }
