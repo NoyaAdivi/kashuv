@@ -1,7 +1,7 @@
 /* Service worker: makes Kashuv an installable app that also opens offline.
    It lives in the project root so it controls the whole site, locally and on GitHub Pages. */
-const VERSION = 'kashuv-v4';
-const SHELL = ['./', 'static/style.css', 'static/app.js', 'static/plus.js', 'static/a11y.js', 'static/logo.svg', 'static/noya-app.js',
+const VERSION = 'kashuv-v5';
+const SHELL = ['./', 'static/style.css', 'static/app.js', 'static/plus.js', 'static/motion.js', 'static/a11y.js', 'static/logo.svg', 'static/noya-app.js',
   'static/faq.js', 'static/manifest.webmanifest', 'static/icons/icon-192.png'];
 
 self.addEventListener('install', (e) => {
