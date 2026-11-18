@@ -17,7 +17,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/NoyaAdivi/kashuv?color=DAD5FF&labelColor=5548C8" alt="רישיון"></a>
   <a href="https://github.com/NoyaAdivi/kashuv/commits/main"><img src="https://img.shields.io/github/last-commit/NoyaAdivi/kashuv?color=FFD5C9&labelColor=A8483A" alt="עדכון אחרון"></a>
   <a href="https://github.com/NoyaAdivi/kashuv"><img src="https://img.shields.io/github/languages/top/NoyaAdivi/kashuv?color=D9F3E7&labelColor=1F7350" alt="שפה עיקרית"></a>
-  <img src="https://img.shields.io/badge/cost-%240-FBD5E0?labelColor=A03A5C" alt="עלות: 0">
+  <a href="#tech-stack"><img src="https://img.shields.io/badge/cost-%240-FBD5E0?labelColor=A03A5C" alt="עלות: 0"></a>
 </p>
 
 <h3 align="center">להיות קשובה בכל זום, הרצאה ושיעור, ולא לאבד את החוט אף פעם.</h3>
@@ -81,7 +81,7 @@
 <p align="center"><a href="#how-it-works"><img src="docs/readme/screens-he.svg" width="100%" alt="תראו את זה בפעולה"></a></p>
 
 <p align="center">
-  <img src="docs/images/kashuv-screens-he.jpg" width="100%" alt="זום חי במצב כהה לצד סיכום מוכן במצב בהיר">
+  <a href="https://noyaadivi.github.io/kashuv/"><img src="docs/images/kashuv-screens-he.jpg" width="100%" alt="זום חי במצב כהה לצד סיכום מוכן במצב בהיר"></a>
 </p>
 
 <p align="center">

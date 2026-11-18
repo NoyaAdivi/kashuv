@@ -15,7 +15,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/NoyaAdivi/kashuv?color=DAD5FF&labelColor=5548C8" alt="License"></a>
   <a href="https://github.com/NoyaAdivi/kashuv/commits/main"><img src="https://img.shields.io/github/last-commit/NoyaAdivi/kashuv?color=FFD5C9&labelColor=A8483A" alt="Last commit"></a>
   <a href="https://github.com/NoyaAdivi/kashuv"><img src="https://img.shields.io/github/languages/top/NoyaAdivi/kashuv?color=D9F3E7&labelColor=1F7350" alt="Top language"></a>
-  <img src="https://img.shields.io/badge/cost-%240-FBD5E0?labelColor=A03A5C" alt="Cost: $0">
+  <a href="#tech-stack"><img src="https://img.shields.io/badge/cost-%240-FBD5E0?labelColor=A03A5C" alt="Cost: $0"></a>
 </p>
 
 <h3 align="center">Stay focused in every Zoom, lecture and class. Never lose the thread again.</h3>
@@ -79,7 +79,7 @@
 <p align="center"><a href="#how-it-works"><img src="docs/readme/screens-en.svg" width="100%" alt="See it in action"></a></p>
 
 <p align="center">
-  <img src="docs/images/kashuv-screens.jpg" width="100%" alt="Kashuv live mode in dark mode next to a finished summary in light mode">
+  <a href="https://noyaadivi.github.io/kashuv/"><img src="docs/images/kashuv-screens.jpg" width="100%" alt="Kashuv live mode in dark mode next to a finished summary in light mode"></a>
 </p>
 
 <p align="center">
