@@ -113,3 +113,21 @@ def test_resummarize_clears_partial_flag(client, monkeypatch):
 def test_index_page_loads(client):
     r = client.get("/")
     assert r.status_code == 200 and b"kashuv" in r.data
+
+
+def test_bad_ids_and_broken_bodies_do_not_crash(client):
+    assert client.get("/api/sessions/..%2F..%2Fetc").status_code == 404
+    s = make_session("20260101-120000-dddd")
+    r = client.post(f"/api/sessions/{s['id']}/rename", data="oops", content_type="text/plain")
+    assert r.status_code == 400
+
+
+def test_service_worker_is_served_from_the_root(client):
+    r = client.get("/sw.js")
+    assert r.status_code == 200 and b"caches" in r.data
+
+
+def test_page_loads_faq_and_app_files(client):
+    html = client.get("/").data.decode()
+    for f in ("static/faq.js", "static/noya-app.js", "static/manifest.webmanifest"):
+        assert f in html and client.get("/" + f).status_code == 200

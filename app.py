@@ -28,6 +28,12 @@ def run_job(job_id, work):
     threading.Thread(target=target, daemon=True).start()
 
 
+def body():
+    """The JSON body of a request, or {} when it is missing or broken."""
+    data = request.get_json(silent=True)
+    return data if isinstance(data, dict) else {}
+
+
 def new_job():
     jid = uuid.uuid4().hex[:10]
     jobs[jid] = {"id": jid, "status": "queued", "step": "", "progress": 0.0}
@@ -42,6 +48,19 @@ def finish(job, session):
     session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=p), session.get("lang", "he"))
     storage.save(session)
     job["session"] = session["id"]
+
+
+@app.errorhandler(ValueError)
+def bad_request(e):
+    return jsonify(error="not found"), 404
+
+
+@app.get("/sw.js")
+def service_worker():
+    """Served from the root so the installed app works on every page."""
+    res = send_from_directory(config.ROOT, "sw.js", mimetype="application/javascript")
+    res.headers["Cache-Control"] = "no-cache"
+    return res
 
 
 @app.get("/")
@@ -111,7 +130,7 @@ def resummarize(sid):
 @app.post("/api/sessions/<sid>/rename")
 def rename(sid):
     s = storage.load(sid) or abort(404)
-    title = (request.json or {}).get("title", "").strip()[:120]
+    title = body().get("title", "").strip()[:120]
     if not title:
         return jsonify(error="empty"), 400
     s["name"] = title
@@ -124,7 +143,7 @@ def rename(sid):
 @app.post("/api/sessions/<sid>/ask")
 def ask(sid):
     s = storage.load(sid) or abort(404)
-    q = (request.json or {}).get("q", "").strip()
+    q = body().get("q", "").strip()
     if not q:
         return jsonify(error="empty"), 400
     try:
@@ -135,10 +154,10 @@ def ask(sid):
 
 @app.post("/api/live/start")
 def live_start():
-    body = request.json or {}
+    data = body()
     sid = storage.new_id()
-    lives[sid] = Live(sid, body.get("lang", "he"), body.get("name", ""), body.get("source", "computer"),
-                      (body.get("title") or "").strip())
+    lives[sid] = Live(sid, data.get("lang", "he"), data.get("name", ""), data.get("source", "computer"),
+                      (data.get("title") or "").strip())
     threading.Thread(target=transcribe.get_model, daemon=True).start()
     return jsonify(id=sid)
 
@@ -152,7 +171,10 @@ def live_state(sid):
 @app.post("/api/live/<sid>/missed")
 def live_missed(sid):
     lv = lives.get(sid) or abort(404)
-    minutes = int((request.json or {}).get("minutes", 3))
+    try:
+        minutes = max(1, min(int(body().get("minutes", 3)), 60))
+    except (TypeError, ValueError):
+        minutes = 3
     text = lv.recent_text(minutes)
     if not text.strip():
         return jsonify(text="עוד לא נאמר כלום בדקות האלה 🙂")
@@ -165,7 +187,7 @@ def live_missed(sid):
 @app.post("/api/live/<sid>/mark")
 def live_mark(sid):
     lv = lives.get(sid) or abort(404)
-    lv.marks.append({"t": round(lv.elapsed()), "note": (request.json or {}).get("note", "")})
+    lv.marks.append({"t": round(lv.elapsed()), "note": body().get("note", "")})
     return jsonify(marks=lv.marks)
 
 
