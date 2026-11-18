@@ -33,6 +33,7 @@ class Live:
         self.segments, self.alerts, self.marks = [], [], []
         self.summary = {"now": "", "points": [], "questions": []}
         self.status, self.error, self.level = "starting", None, 0.0
+        self.levels, self.lcount = collections.deque(maxlen=240), 0  # one value every half second, for the live sound wave
         self.started = time.time()
         self.running = True
         self._q = queue.Queue()
@@ -107,6 +108,8 @@ class Live:
                     block[:len(x)] += x
                 block = np.clip(block, -1, 1)
                 self.level = float(np.sqrt(np.mean(block ** 2)))
+                self.levels.append(round(self.level, 4))
+                self.lcount += 1
                 self._wav.writeframes((block * 32767).astype(np.int16).tobytes())
                 chunk.append(block)
                 have += n
@@ -180,7 +183,7 @@ class Live:
 
     def state(self, since=0):
         return {"status": self.status, "error": self.error, "elapsed": round(self.elapsed()),
-                "level": round(self.level, 4), "segments": self.segments[since:], "count": len(self.segments),
+                "level": round(self.level, 4), "levels": list(self.levels)[-80:], "lcount": self.lcount, "segments": self.segments[since:], "count": len(self.segments),
                 "alerts": self.alerts, "marks": self.marks, "summary": self.summary, "rolling": self._rolling}
 
     def stop(self):
@@ -191,4 +194,4 @@ class Live:
         except Exception:
             pass
         return {"duration": round(self.elapsed()), "segments": self.segments, "marks": self.marks,
-                "audio": self.audio_name, "source": self.source}
+                "audio": self.audio_name, "source": self.source, "alerts": self.alerts}

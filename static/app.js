@@ -45,13 +45,14 @@ let cleanup = () => {}, routeId = 0;
 async function route() {
   const my = ++routeId;
   cleanup(); cleanup = () => {}; main.onclick = null; document.body.classList.remove('focus');
-  const [, view, id] = location.hash.split('/');
+  const [, view, id, extra] = location.hash.split('/');
   document.querySelectorAll('[data-nav]').forEach((a) => a.setAttribute('aria-current', a.dataset.nav === (view || 'home') ? 'page' : 'false'));
   window.scrollTo(0, 0);
   try {
     if (view === 'live') await liveView();
-    else if (view === 'library') await libraryView();
-    else if (view === 's' && id) await summaryView(id);
+    else if (view === 'library') await libraryView(id ? decodeURIComponent(id) : '');
+    else if (view === 'stats') await statsView();
+    else if (view === 's' && id) await summaryView(id, extra);
     else if (view === 'accessibility') a11yView();
     else await homeView();
   } catch (e) { if (my === routeId) main.innerHTML = `<div class="card empty">😕 ${esc(e.message)}</div>`; }
@@ -61,12 +62,12 @@ addEventListener('hashchange', route);
 /* ---------- home ---------- */
 async function homeView() {
   main.innerHTML = `
-  <section class="hero">
+  <section class="hero hero-split"><div class="hero-text">
     <div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div>
     <h1>${L("להיות <em>קשובה</em> בכל זום, הרצאה ושיעור", "Stay <em>focused</em> in every Zoom, lecture and class")}</h1>
     <p>${L("תמלול בזמן אמת, עזרה להתרכז, וסיכומים מטורפים שנראים כמו מחברת של התלמידה הכי טובה בכיתה. חינם, ובמחשב שלך.", "Live transcription, focus helpers and stunning summaries that look like the notes of the best student in class. Free, and on your own computer.")}</p>
     <div class="status-row" id="health"><span class="chip">${L("בודקת מערכת", "Checking system")}<span class="dots"></span></span></div>
-  </section>
+  </div>${heroDemoHTML()}</section>
   <section class="choices">
     <div class="card choice lilacy pop" style="--i:1">
       <div class="big">🎧</div>
@@ -94,15 +95,17 @@ async function homeView() {
   </section>
   <div class="section-title"><h2>${L('סיכומים אחרונים','Recent summaries')}</h2><a href="#/library">${L("לכל הסיכומים ←", "All summaries →")}</a></div>
   <div class="lib" id="recent"></div>`;
+  cleanup = heroDemo();
 
   api('/api/health').then((h) => {
-    if (h.demo) { $('#health').innerHTML = `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">🧪 ${L('מצב הדגמה: נתונים לדוגמה, בלי הקלטה אמיתית','Demo mode: sample data, no real recording')}</span><a class="chip" href="https://github.com/NoyaAdivi/kashuv#run-locally">⬇️ ${L('להתקנה המלאה במחשב','Get the full app')}</a>`; return; }
+    if (h.demo) { $('#health').innerHTML = `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">🧪 ${L('מצב הדגמה: נתונים לדוגמה, בלי הקלטה אמיתית','Demo mode: sample data, no real recording')}</span><a class="chip" href="https://github.com/NoyaAdivi/kashuv#run-locally">⬇️ ${L('להתקנה המלאה במחשב','Get the full app')}</a><button class="chip" type="button" id="tour-btn">🧭 ${L('סיור קצר','Quick tour')}</button>`; $('#tour-btn').addEventListener('click', () => tour(true)); return; }
     $('#health').innerHTML = `
       <span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">🎙️ ${L('תמלול','Transcription')}: ${h.loaded ? L('מוכן','ready') : L('ייטען בשימוש הראשון','loads on first use')}</span>
       ${h.ollama.running && h.ollama.model ? `<span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">✨ ${L('סיכומים','Summaries')}: ${esc(h.ollama.name)} ${L('מוכן','ready')}</span>`
         : `<span class="chip" style="--c:var(--warn);--c-soft:var(--warn-soft)">⚠️ ${h.ollama.running ? L(`חסר המודל ${esc(h.ollama.name)} ב-Ollama`, `Model ${esc(h.ollama.name)} is missing in Ollama`) : L('Ollama לא פועל, אין סיכומים','Ollama is not running, no summaries')}</span>`}`;
   }).catch(() => {});
   renderLib($('#recent'), (await api('/api/sessions')).slice(0, 6));
+  if (DEMO) setTimeout(() => location.hash.length < 3 && tour(), 900);
 
   const drop = $('#drop'), file = $('#file');
   ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
@@ -170,15 +173,18 @@ function renderLib(el, items) {
       <small class="muted">${dateHe(s.created)}</small>
     </a>`).join('');
 }
-async function libraryView() {
+async function libraryView(start = '') {
   main.innerHTML = `<div class="section-title" style="margin-top:0"><h1>${L('הסיכומים שלי','My summaries')}</h1>
-    <input class="search" id="q" type="search" placeholder="${L('חיפוש לפי נושא או מילה','Search by topic or word')}" aria-label="${L('חיפוש סיכומים','Search summaries')}"></div><div class="lib" id="all"></div>`;
+    <input class="search" id="q" type="search" placeholder="${L('חיפוש לפי נושא או מילה','Search by topic or word')}" aria-label="${L('חיפוש סיכומים','Search summaries')}"></div><p class="muted lib-hint">${L('💡 החיפוש מוצא גם מילים שנאמרו בתוך ההקלטות, וקופץ ישר לרגע הזה','💡 Search also finds words said inside the recordings, and jumps right to that moment')}</p><div class="lib" id="all"></div><div class="hits" id="hits" aria-live="polite"></div>`;
   const items = await api('/api/sessions');
   const draw = () => {
     const q = $('#q').value.trim();
-    renderLib($('#all'), items.filter((s) => !q || [s.title, s.tldr, ...(s.keywords || [])].join(' ').includes(q)));
+    renderLib($('#all'), items.filter((s) => !q || [s.title, s.tldr, ...(s.keywords || [])].join(' ').toLowerCase().includes(q.toLowerCase())));
   };
-  $('#q').addEventListener('input', draw); draw();
+  let t;
+  const deep = () => { clearTimeout(t); t = setTimeout(() => searchEverywhere($('#q').value.trim(), $('#hits')).catch(() => {}), 250); };
+  $('#q').value = start;
+  $('#q').addEventListener('input', () => { draw(); deep(); }); draw(); deep();
 }
 
 /* ---------- live ---------- */
@@ -217,7 +223,6 @@ function liveRun(id) {
   main.innerHTML = `
   <div class="card live-top">
     <span class="orb idle" id="orb"></span><span class="timer" id="timer">00:00</span>
-    <span class="meter" id="meter" aria-hidden="true">${'<b></b>'.repeat(8)}</span>
     <span class="muted" id="lstatus">${L('מתחברת לשמע','Connecting to audio')}<span class="dots"></span></span>
     <div class="live-tools">
       <button class="btn soft small" data-missed="2">${L("🙈 מה פספסתי? 2 דק'", "🙈 What did I miss? 2 min")}</button>
@@ -227,6 +232,7 @@ function liveRun(id) {
       <button class="btn soft small" id="focus" aria-pressed="false">${L('🎯 מצב ריכוז','🎯 Focus mode')}</button>
       <button class="btn peach small" id="stop">${L("⏹ סיימי וסכמי", "⏹ Stop & summarize")}</button>
     </div>
+    <canvas class="live-wave" id="lwave" aria-hidden="true"></canvas>
   </div>
   <p class="muted keys no-print">⌨️ ${L('קיצורים: M רגע חשוב · F מצב ריכוז · 1 / 2 / 3 מה פספסתי · נשמר אוטומטית כל כמה שניות', 'Shortcuts: M important moment · F focus mode · 1 / 2 / 3 what did I miss · auto-saved every few seconds')}</p>
   <div id="lerr"></div>
@@ -252,7 +258,8 @@ function liveRun(id) {
     if (btn && $(btn)) { e.preventDefault(); $(btn).click(); }
   };
   addEventListener('keydown', keys);
-  cleanup = () => { alive = false; clearTimeout(timerId); document.title = 'Kashuv'; removeEventListener('keydown', keys); };
+  const wave = liveWave($('#lwave'));
+  cleanup = () => { alive = false; wave.stop(); clearTimeout(timerId); document.title = 'Kashuv'; removeEventListener('keydown', keys); };
   const list = (el, arr, render = esc) => { const h = arr.length ? arr.map((x) => `<li>${render(x)}</li>`).join('') : ''; if (el.dataset.h !== h) { el.dataset.h = h; el.innerHTML = h; } };
 
   const poll = async () => {
@@ -263,8 +270,7 @@ function liveRun(id) {
     $('#timer').textContent = fmt(s.elapsed);
     $('#orb').classList.toggle('idle', s.status !== 'listening');
     $('#lstatus').innerHTML = s.status === 'listening' ? (s.rolling ? L('מעדכנת סיכום','Updating summary') + '<span class="dots"></span>' : L('מקשיבה','Listening')) : s.status === 'error' ? L('שגיאה','Error') : L('מתחברת לשמע','Connecting to audio') + '<span class="dots"></span>';
-    const lvl = Math.min(1, s.level * 12);
-    $('#meter').querySelectorAll('b').forEach((b, i) => { b.style.height = Math.max(4, lvl * 26 * (0.5 + Math.abs(Math.sin(Date.now() / 200 + i)))) + 'px'; });
+    wave.push(s);
     $('#lerr').innerHTML = s.error ? `<p class="note warn">⚠️ ${esc(s.error)}</p>` : '';
     if (s.segments.length) {
       $('#wait')?.remove();
@@ -314,7 +320,7 @@ function liveRun(id) {
 }
 
 /* ---------- summary ---------- */
-async function summaryView(id) {
+async function summaryView(id, at) {
   const s = await api('/api/sessions/' + id);
   const m = s.summary || {};
   const has = (a) => Array.isArray(a) && a.length;
@@ -344,6 +350,7 @@ async function summaryView(id) {
     </div>
   </section>
   ${s.audio ? `<div class="card player"><span aria-hidden="true">🎵</span><audio id="audio" controls preload="metadata" src="/media/${esc(s.audio)}"></audio></div>` : ''}
+  ${timelineHTML(s, m)}
   <div class="tabs" role="tablist" aria-label="${L('חלקי הסיכום','Summary sections')}">
     ${tabs.map(([k, t], i) => `<button role="tab" id="t-${k}" aria-controls="p-${k}" aria-selected="${i === 0}">${t}</button>`).join('')}
   </div>
@@ -360,8 +367,7 @@ async function summaryView(id) {
     <div class="card pop"><h3>${L('✅ משימות','✅ Tasks')}</h3><ul class="todo">${(m.tasks || []).map((t, i) => `<li><label><input type="checkbox" data-todo="${i}"><span>${esc(t)}</span></label></li>`).join('') || `<li class="muted">${L('לא הוזכרו משימות','No tasks were mentioned')}</li>`}</ul></div>
     <div class="card pop" style="--i:1"><h3>${L("❓ שאלות שעלו", "❓ Questions raised")}</h3><ul class="ticks">${(m.questions || []).map((q) => `<li>${esc(q)}</li>`).join('') || `<li class="muted">${L('לא עלו שאלות','No questions came up')}</li>`}</ul></div>
   </div></section>` : ''}
-  ${has(m.quiz) ? `<section class="panel" id="p-quiz" role="tabpanel" data-title="${L('תרגול','Practice')}" hidden><p class="muted no-print">${L("לחצי על כרטיס כדי לראות את התשובה.", "Click a card to see the answer.")}</p><div class="cards">${m.quiz.map((q, i) => `
-    <button class="flip pop" style="--i:${i}" aria-label="${L('שאלה','Question')} ${i + 1}"><div class="in"><div class="f"><small>${L('שאלה','Question')} ${i + 1}</small>${esc(q.q)}</div><div class="b"><small>${L('תשובה','Answer')}</small>${esc(q.a)}</div></div></button>`).join('')}</div></section>` : ''}
+  ${has(m.quiz) ? `<section class="panel" id="p-quiz" role="tabpanel" data-title="${L('תרגול','Practice')}" hidden>${deckHTML(m.quiz)}</section>` : ''}
   ${titleOf.tl ? `<section class="panel" id="p-tl" role="tabpanel" data-title="${L('ציר זמן','Timeline')}" hidden><div class="card"><ol class="tl">
     ${[...(m.timeline || []).map((t) => ({ sec: toSec(t.time), title: t.title, star: false })), ...(s.marks || []).map((k) => ({ sec: k.t, title: k.note || L('רגע חשוב','Important moment'), star: true }))]
       .sort((a, b) => a.sec - b.sec).map((t) => `<li><button data-seek="${t.sec}">${fmt(t.sec)}</button><span>${t.star ? '⭐ ' : ''}${esc(t.title)}</span></li>`).join('')}
@@ -389,11 +395,21 @@ async function summaryView(id) {
   };
   drawTr(); $('#find').addEventListener('input', (e) => drawTr(e.target.value.trim()));
   const audio = $('#audio');
+  const jump = (sec, play = true) => {
+    if (audio) { audio.currentTime = sec; if (play) audio.play().catch(() => {}); return; }
+    // no recording saved: open the transcript at that moment instead
+    $('#t-tr')?.click(); $('#find').value = ''; drawTr();
+    const el = [...main.querySelectorAll('.seg')].reverse().find((x) => +x.dataset.start <= sec + 0.5) || main.querySelector('.seg');
+    if (el) { main.querySelectorAll('.seg.cur').forEach((x) => x.classList.remove('cur')); el.classList.add('cur'); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  };
   main.onclick = (e) => {
     const b = e.target.closest('[data-seek]');
-    if (b && audio) { audio.currentTime = +b.dataset.seek; audio.play(); }
-    const f = e.target.closest('.flip'); if (f) f.classList.toggle('on');
+    if (b) { const inTr = b.classList.contains('seg'); if (audio || !inTr) jump(+b.dataset.seek); }
+    const f = e.target.closest('.flip'); if (f && f.id !== 'deck-card') f.classList.toggle('on');
   };
+  followTimeline(audio, s.duration);
+  cleanup = has(m.quiz) ? deck(m.quiz, id) : () => {};
+  if (at) setTimeout(() => { jump(+at, false); if (audio) { $('#t-tr')?.click(); jump(+at, false); } toast(L(`▶ קפצתי ל-${fmt(+at)}`, `▶ Jumped to ${fmt(+at)}`)); }, 300);
   if (audio) audio.addEventListener('timeupdate', () => {
     let cur = null;
     main.querySelectorAll('.seg').forEach((el) => { if (+el.dataset.start <= audio.currentTime) cur = el; el.classList.remove('cur'); });

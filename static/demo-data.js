@@ -25,10 +25,29 @@
       summary: n < 3 ? { now: '', points: [], questions: [] } : { now: NOW[L][stage], points: POINTS[L].slice(0, stage + 2), questions: n > 10 ? [T(L, 'להגיש תרגיל 3 עד יום חמישי', 'Submit exercise 3 by Thursday')] : [] } };
   }
 
+  // sample "you were mentioned" moments, so the lecture map shows every kind of pin
+  D.he.alerts = D.he.alerts || [{ t: 2460, text: 'דנה, את יכולה להגיד לי איזו רוטציה צריך כאן?' }];
+  D.en.alerts = D.en.alerts || [{ t: 2460, text: 'Dana, can you tell me which rotation we need here?' }];
+  // a few weeks of sample history for the progress page (no pages behind them, they only feed the charts)
+  const HISTORY = [[0, 3, 4200, 'live', 'computer', ['AVL', 'עצים']], [1, 1, 2700, 'live', 'class', ['גרפים', 'BFS']], [2, 2, 5400, 'file', '', ['עצים', 'רקורסיה']],
+    [3, 4, 3600, 'live', 'computer', ['גרפים', 'DFS']], [5, 2, 1800, 'live', 'class', ['ערימות']], [8, 3, 4800, 'file', '', ['עצים', 'ערימות']], [9, 1, 3000, 'live', 'computer', ['רקורסיה']]];
+  const history = (lang) => HISTORY.map(([daysAgo, , dur, kind, source, kw], i) => ({ id: 'h' + i, created: Date.now() / 1000 - daysAgo * 86400 - 3600, duration: dur, kind, source,
+    keywords: lang === 'en' ? kw.map((k) => ({ 'עצים': 'Trees', 'גרפים': 'Graphs', 'רקורסיה': 'Recursion', 'ערימות': 'Heaps' }[k] || k)) : kw }));
+
   window.demoApi = async (url, opts = {}, lang = 'he') => {
     await wait(200);
     const method = opts.method || 'GET', body = opts.body || {};
     const [, , kind, id, action] = url.split('?')[0].split('/');
+    if (kind === 'search') {
+      const q = (new URLSearchParams(url.split('?')[1] || '').get('q') || '').trim().toLowerCase();
+      if (q.length < 2) return [];
+      return [D.he, D.en].filter((s) => !deleted.has(s.id)).flatMap((s) => s.segments.filter((g) => g.text.toLowerCase().includes(q))
+        .map((g) => ({ id: s.id, title: s.summary.title, emoji: s.summary.emoji, t: g.start, text: g.text })));
+    }
+    if (kind === 'stats') {
+      const mine = (lang === 'en' ? [D.en] : [D.he]).filter((s) => !deleted.has(s.id)).map((s) => ({ id: s.id, created: Date.now() / 1000 - 7200, duration: s.duration, kind: s.kind, source: 'computer', keywords: s.summary.keywords.slice(0, 4) }));
+      return [...mine, ...history(lang)];
+    }
     if (kind === 'health') return { demo: true, ollama: { running: true, model: true, name: 'demo' }, loaded: true };
     if (kind === 'sessions' && !id) {
       const list = (lang === 'en' ? [D.en, D.he] : [D.he, D.en]).filter((s) => !deleted.has(s.id));

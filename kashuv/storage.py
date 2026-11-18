@@ -46,3 +46,24 @@ def list_all():
                       "tldr": sm.get("tldr", ""), "created": s.get("created"), "kind": s.get("kind"), "source": s.get("source"),
                       "duration": s.get("duration", 0), "keywords": sm.get("keywords", [])[:4]})
     return items
+
+
+def search(q, limit=60):
+    """Finds a word in every summary and transcript. Returns where it was said, so the page can jump there."""
+    q = (q or "").strip().lower()
+    if len(q) < 2:
+        return []
+    hits = []
+    for p in sorted(config.SESSIONS.glob("*.json"), reverse=True):
+        try:
+            s = json.loads(p.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        sm = s.get("summary") or {}
+        base = {"id": s["id"], "title": sm.get("title") or s.get("name"), "emoji": sm.get("emoji", "📝")}
+        for g in s.get("segments", []):
+            if q in g.get("text", "").lower():
+                hits.append({**base, "t": g.get("start", 0), "text": g["text"]})
+                if len(hits) >= limit:
+                    return hits
+    return hits

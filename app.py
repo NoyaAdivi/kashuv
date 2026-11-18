@@ -107,6 +107,16 @@ def sessions():
     return jsonify(storage.list_all())
 
 
+@app.get("/api/search")
+def search():
+    return jsonify(storage.search(request.args.get("q", "")))
+
+
+@app.get("/api/stats")
+def stats():
+    return jsonify(storage.list_all())
+
+
 @app.get("/api/sessions/<sid>")
 def session(sid):
     s = storage.load(sid)

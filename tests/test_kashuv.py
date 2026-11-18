@@ -131,3 +131,11 @@ def test_page_loads_faq_and_app_files(client):
     html = client.get("/").data.decode()
     for f in ("static/faq.js", "static/noya-app.js", "static/manifest.webmanifest"):
         assert f in html and client.get("/" + f).status_code == 200
+
+
+def test_search_finds_words_inside_transcripts(client):
+    make_session("20260101-120000-eeee")
+    hits = client.get("/api/search?q=avl").json
+    assert hits and hits[0]["t"] == 61 and hits[0]["id"] == "20260101-120000-eeee"
+    assert client.get("/api/search?q=a").json == []
+    assert client.get("/api/stats").status_code == 200
