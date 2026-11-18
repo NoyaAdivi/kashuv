@@ -145,7 +145,7 @@ flowchart LR
 > [!NOTE]
 > The [online demo](https://noyaadivi.github.io/kashuv/) runs on GitHub Pages with sample data so you can click through every screen. Real recording and transcription need the local app below.
 
-3. Double click **`start.bat`**. The first run creates a virtual environment, installs everything and downloads the Hebrew speech model (about 1.6 GB). Kashuv then opens at `http://localhost:5170`.
+3. Double-click **`start.bat`**. The first run creates a virtual environment, installs everything and downloads the Hebrew speech model (about 1.6 GB). Kashuv then opens at `http://localhost:5170`.
 
 > [!TIP]
 > Slow laptop? Set `KASHUV_WHISPER=small`. Strong PC? Try `KASHUV_LLM=qwen2.5:7b`. Every setting lives in [`kashuv/config.py`](kashuv/config.py).

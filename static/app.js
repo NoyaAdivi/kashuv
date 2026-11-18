@@ -281,7 +281,7 @@ function liveRun(id) {
       const a = s.alerts[s.alerts.length - 1]; seenAlerts = s.alerts.length;
       toast(`${L("📣 הזכירו אותך", "📣 You were mentioned")}: "${a.text}"`, 'alert'); beep();
       $('.now').classList.add('flash'); setTimeout(() => $('.now')?.classList.remove('flash'), 3000);
-      document.title = L('📣 קוראים לך! Kashuv','📣 You are called! Kashuv');
+      document.title = L('📣 קוראים לך! Kashuv','📣 Your name was called! Kashuv');
     }
     $('#alerts-card').hidden = !s.alerts.length; list($('#alerts'), s.alerts, (a) => `<b>${fmt(a.t)}</b> ${esc(a.text)}`);
     $('#marks-card').hidden = !s.marks.length; list($('#marks'), s.marks, (m) => `<b>${fmt(m.t)}</b> ${esc(m.note || L('רגע חשוב','Important moment'))}`);
@@ -454,7 +454,7 @@ function a11yView() {
     <h1 style="margin-bottom:12px">♿ ${L('הצהרת נגישות', 'Accessibility statement')}</h1>
     <p>${L('Kashuv נבנתה כדי שכל אחד ואחת יוכלו להשתמש בה בנוחות, בהתאם להנחיות WCAG 2.1 ברמה AA ולתקן הישראלי 5568.', 'Kashuv is built so everyone can use it comfortably, following WCAG 2.1 level AA and the Israeli standard IS 5568.')}</p>
     <ul class="ticks">${items.map((t) => `<li>${t}</li>`).join('')}</ul>
-    <p class="muted" style="margin-top:18px">${L('מצאת בעיה? אשמח לשמוע:', 'Found a problem? I would love to hear:')} <a href="https://www.linkedin.com/in/noya-adivi" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
+    <p class="muted" style="margin-top:18px">${L('מצאת בעיה? אשמח לשמוע:', 'Found a problem? I would love to hear about it:')} <a href="https://www.linkedin.com/in/noya-adivi" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
   </section>`;
 }
 

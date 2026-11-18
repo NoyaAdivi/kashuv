@@ -153,7 +153,7 @@ flowchart LR
 > מחשב איטי? להגדיר `KASHUV_WHISPER=small`. מחשב חזק? לנסות `KASHUV_LLM=qwen2.5:7b`. כל ההגדרות נמצאות ב-[`kashuv/config.py`](kashuv/config.py).
 
 > [!NOTE]
-> מצב אונליין מקליט את כל התקני השמע עם WASAPI loopback ב-Windows, ולכן עובד גם עם אוזניות. מצב כיתה משתמש במיקרופון. ב-Mac צריך התקן loopback כמו BlackHole.
+> מצב אונליין מקליט את כל התקני השמע עם WASAPI loopback ב-Windows, ולכן עובד גם עם אוזניות. מצב כיתה משתמש במיקרופון ברירת המחדל. ב-Mac צריך התקן loopback כמו BlackHole.
 
 <details>
 <summary><b>🧪 בדיקות</b></summary>
