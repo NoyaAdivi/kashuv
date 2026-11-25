@@ -65,10 +65,12 @@ class Live:
             pass  # a device that cannot be recorded (unplugged, in use) is simply skipped
 
     def _devices(self):
+        # Import soundcard first: on its first import it sets up Windows audio (COM) itself,
+        # and fails with "Error 0x100000001" if this thread was already set up before it.
+        import soundcard as sc
         if sys.platform == "win32":
             import ctypes
             ctypes.windll.ole32.CoInitializeEx(None, 0)
-        import soundcard as sc
         devs = []
         if self.source in ("computer", "both"):
             for spk in sc.all_speakers():  # speakers, headphones, Bluetooth: whatever Zoom plays to
