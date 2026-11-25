@@ -231,7 +231,7 @@ mark { background: var(--butter-soft); color: inherit; border-radius: 4px; paddi
 .bubble.ai { background: var(--surface-2); justify-self: end; border-end-end-radius: 4px; }
 .ask-row { display: flex; gap: 8px; }
 .ask-row input { flex: 1; border: 1px solid var(--line); background: var(--surface-2); border-radius: 999px; padding: 12px 18px; }
-.dots::after { content: "..."; animation: dots 1.2s steps(4) infinite; display: inline-block; width: 1.2em; overflow: hidden; vertical-align: bottom; }
+.dots::after { content: "..."; animation: dots 1.2s steps(4) infinite; display: inline-block; width: 1.2em; white-space: nowrap; text-align: start; overflow: hidden; vertical-align: bottom; }
 @keyframes dots { from { width: 0; } }
 
 /* toasts */
@@ -461,3 +461,27 @@ main.page-in > *:nth-child(2) { animation-delay: .06s; } main.page-in > *:nth-ch
 html.a11y-still .rv, html.a11y-still .sparkles { opacity: 1; transform: none; }
 html.a11y-still .sparkles { display: none; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; } .sparkles { display: none; } }
+
+/* ---------- live vs recording: clear choices ---------- */
+.choice-tag { justify-self: start; font-size: .8rem; font-weight: 600; padding: 4px 12px; border-radius: 999px; background: var(--c-soft); color: var(--ink, inherit); }
+.choice.lilacy .choice-tag { color: var(--lilac); }
+.choice.peachy .choice-tag { color: var(--peach-deep); }
+.choice-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.choice-list li { font-size: .88rem; padding: 6px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.step-n { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-inline-end: 6px; border-radius: 50%; background: var(--lilac); color: #fff; font-size: .85rem; font-weight: 700; vertical-align: middle; }
+.form-step { margin: 6px 0 -4px; font-weight: 500; }
+.small-note { font-size: .92rem; margin-top: 6px; }
+.upload-page { max-width: 640px; margin: 0 auto; display: grid; gap: 20px; }
+.choices.one { grid-template-columns: 1fr; }
+
+/* ---------- in-app dialog (replaces the browser's plain pop-ups) ---------- */
+.k-dialog { border: 0; padding: 0; border-radius: 24px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); width: min(420px, 92vw); }
+.k-dialog::backdrop { background: rgba(43, 33, 64, .35); backdrop-filter: blur(4px); }
+.k-dialog[open] { animation: k-pop .28s cubic-bezier(.2, 1.4, .4, 1); }
+.k-dialog form { display: grid; gap: 16px; padding: 24px; }
+.k-dialog-text { margin: 0; font-size: 1.05rem; font-weight: 500; line-height: 1.6; }
+.k-dialog-input { font: inherit; padding: 12px 14px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.k-dialog-input:focus { outline: none; border-color: var(--lilac); }
+.k-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+@keyframes k-pop { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .k-dialog[open] { animation: none; } }

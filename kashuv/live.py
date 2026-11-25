@@ -10,10 +10,12 @@ import time
 import wave
 import queue
 import collections
+import warnings
 import numpy as np
 from . import config, summarize, storage
 from .transcribe import transcribe_chunk
 
+warnings.filterwarnings("ignore", message="data discontinuity")  # harmless gaps reported by Windows loopback
 RATE = 48000  # what sound cards like
 OUT = 16000   # what Whisper wants
 
@@ -41,6 +43,7 @@ class Live:
         self._last_roll = time.time()
         self._rolling = False
         self._done = threading.Event()
+        self._closed = False  # set once the final session is handed over, so autosave never overwrites it
         self.audio_name = f"{sid}.wav"
         self._wav = wave.open(str(config.MEDIA / self.audio_name), "wb")
         self._wav.setnchannels(1)
@@ -58,7 +61,8 @@ class Live:
             if sys.platform == "win32":
                 import ctypes
                 ctypes.windll.ole32.CoInitializeEx(None, 0)
-            with mic.recorder(samplerate=RATE) as rec:
+            # a bigger buffer rides out short CPU spikes (Zoom + transcription) without dropping sound
+            with mic.recorder(samplerate=RATE, blocksize=RATE // 2) as rec:
                 while self.running:
                     buf.append(_to16k(rec.record(numframes=RATE // 4)))
         except Exception:
@@ -146,12 +150,15 @@ class Live:
                 if any(n in text for n in self.names):
                     self.alerts.append({"t": seg["start"], "text": text})
             self.autosave()
-            if self._pending and not self._rolling and time.time() - self._last_roll > config.LIVE_SUMMARY_EVERY:
+            # refresh the live summary only when transcription is caught up, so the text never falls behind
+            if self._pending and not self._rolling and self._q.empty() and time.time() - self._last_roll > config.LIVE_SUMMARY_EVERY:
                 self.roll()
         self._done.set()
 
     def autosave(self):
         """Saves the transcript so far, so nothing is lost if the app or the computer closes mid lecture."""
+        if self._closed:
+            return
         try:
             storage.save({"id": self.id, "kind": "live", "partial": True, "name": self.title or time.strftime("%d.%m %H:%M"),
                           "created": self.started, "lang": self.lang, "source": self.source, "duration": round(self.elapsed()),
@@ -188,9 +195,14 @@ class Live:
                 "level": round(self.level, 4), "levels": list(self.levels)[-80:], "lcount": self.lcount, "segments": self.segments[since:], "count": len(self.segments),
                 "alerts": self.alerts, "marks": self.marks, "summary": self.summary, "rolling": self._rolling}
 
-    def stop(self):
+    def stop(self, on_progress=None):
         self.running = False
-        self._done.wait(timeout=120)
+        total, waited = self._q.qsize() + 1, 0
+        while not self._done.wait(timeout=1) and waited < 1800:  # finish transcribing everything already recorded
+            waited += 1
+            if on_progress:
+                on_progress(max(0.0, 1 - self._q.qsize() / total))
+        self._closed = True
         try:
             self._wav.close()
         except Exception:

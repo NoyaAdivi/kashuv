@@ -12,6 +12,14 @@ from kashuv.live import Live
 
 app = Flask(__name__, root_path=str(config.ROOT), template_folder="templates", static_folder="static")
 app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 ** 3  # 4 GB recordings
+
+
+@app.after_request
+def fresh_files(res):
+    """The browser always checks for a newer page and scripts, so an updated Kashuv shows its new version right away."""
+    if request.path == "/" or request.path.startswith("/static/"):
+        res.headers["Cache-Control"] = "no-cache"
+    return res
 jobs, lives = {}, {}
 MEDIA_TYPES = {".mp4", ".m4a", ".mp3", ".wav", ".webm", ".mkv", ".mov", ".ogg", ".aac", ".flac"}
 
@@ -42,9 +50,11 @@ def new_job():
 
 def finish(job, session):
     """Summarize a session that already has segments, then save it."""
-    job.update(status="summarizing", step="כותבת סיכום מטורף", progress=0.0)
     session.pop("partial", None)
-    storage.save(session)
+    storage.save(session)  # the transcript is safe even if the summary fails
+    job.update(status="model", step="", progress=0.0)
+    summarize.ensure_model(lambda p: job.update(progress=p))
+    job.update(status="summarizing", step="כותבת סיכום מטורף", progress=0.0)
     session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=p), session.get("lang", "he"))
     storage.save(session)
     job["session"] = session["id"]
@@ -81,14 +91,14 @@ def upload():
     sid = storage.new_id()
     name = f"{sid}{Path(f.filename).suffix.lower()}"
     f.save(config.MEDIA / name)
-    lang = request.form.get("lang", "he")
+    lang = request.form.get("lang") or "he"
     session = {"id": sid, "kind": "file", "name": Path(secure_filename(f.filename) or f.filename).stem or "הקלטה",
                "created": time.time(), "audio": name, "lang": lang, "segments": [], "marks": []}
     jid = new_job()
 
     def work(job):
         job.update(status="loading", step="מכינה את מודל התמלול (בפעם הראשונה זה לוקח כמה דקות)")
-        transcribe.get_model()
+        transcribe.get_model(lang)
         job.update(status="transcribing", step="מתמללת")
         session["segments"], session["duration"] = transcribe.transcribe_file(
             config.MEDIA / name, lang, lambda p: job.update(progress=p))
@@ -166,9 +176,9 @@ def ask(sid):
 def live_start():
     data = body()
     sid = storage.new_id()
-    lives[sid] = Live(sid, data.get("lang", "he"), data.get("name", ""), data.get("source", "computer"),
+    lives[sid] = Live(sid, data.get("lang") or "he", data.get("name", ""), data.get("source", "computer"),
                       (data.get("title") or "").strip())
-    threading.Thread(target=transcribe.get_model, daemon=True).start()
+    threading.Thread(target=transcribe.get_model, args=(data.get("lang") or "he",), daemon=True).start()
     return jsonify(id=sid)
 
 
@@ -215,7 +225,7 @@ def live_stop(sid):
 
     def work(job):
         job.update(status="transcribing", step="מסיימת לתמלל את השניות האחרונות")
-        data = lv.stop()
+        data = lv.stop(lambda p: job.update(progress=p))
         session = {"id": sid, "kind": "live", "name": lv.title or time.strftime(("Class " if lv.source == "class" else "Zoom ") + "%d.%m %H:%M"),
                    "created": lv.started, "lang": lv.lang, **data}
         finish(job, session)
@@ -240,4 +250,5 @@ if __name__ == "__main__":
     print(f"\n  Kashuv is running at {url}\n")
     threading.Timer(1.2, lambda: webbrowser.open(url)).start()
     threading.Thread(target=warm_up, daemon=True).start()  # warm up so the first lecture starts fast
+    summarize.ensure_model_background()  # download the summary model ahead of time if it is missing
     app.run(port=config.PORT, threaded=True)

@@ -6,6 +6,7 @@ try { LANG = localStorage.getItem('kashuv-lang') || 'he'; } catch (e) {}
 const L = (he, en) => (LANG === 'en' ? en : he);
 const STEP = {
   loading: ['מכינה את מודל התמלול (בפעם הראשונה זה לוקח כמה דקות)', 'Preparing the speech model (a few minutes the first time)'],
+  model: ['מורידה את מודל הסיכומים, פעם אחת בלבד', 'Downloading the summary model, one time only'],
   transcribing: ['מתמללת', 'Transcribing'], summarizing: ['כותבת סיכום מטורף', 'Writing a stunning summary'],
 };
 function applyLang() {
@@ -30,6 +31,28 @@ const api = async (url, opts = {}) => {
 };
 const store = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} } };
 
+/* Styled in-app dialog instead of the browser's plain confirm() and prompt(). Resolves to true/false, or the typed text (null when cancelled). */
+function ask(text, { ok = L('אישור', 'OK'), cancel = L('ביטול', 'Cancel'), input = null, danger = false } = {}) {
+  return new Promise((resolve) => {
+    const d = document.createElement('dialog');
+    d.className = 'k-dialog';
+    d.innerHTML = `<form method="dialog"><p class="k-dialog-text">${esc(text)}</p>
+      ${input !== null ? `<input class="k-dialog-input" value="${esc(input)}" aria-label="${esc(text)}">` : ''}
+      <div class="k-dialog-actions"><button class="btn soft small" value="no" type="submit">${esc(cancel)}</button>
+      <button class="btn small ${danger ? 'danger' : 'lilac'}" value="yes" type="submit">${esc(ok)}</button></div></form>`;
+    document.body.append(d);
+    const field = d.querySelector('input');
+    d.addEventListener('close', () => {
+      const yes = d.returnValue === 'yes';
+      d.remove();
+      resolve(input !== null ? (yes ? field.value : null) : yes);
+    });
+    d.showModal();
+    (field || d.querySelector('[value=yes]')).focus();
+    if (field) field.select();
+  });
+}
+
 function toast(text, kind = '') {
   const t = document.createElement('div');
   t.className = 'toast ' + kind; t.textContent = text;
@@ -52,6 +75,7 @@ async function route() {
   window.scrollTo(0, 0);
   try {
     if (view === 'live') await liveView();
+    else if (view === 'upload') uploadView();
     else if (view === 'library') await libraryView(id ? decodeURIComponent(id) : '');
     else if (view === 'stats') await statsView();
     else if (view === 's' && id) await summaryView(id, extra);
@@ -72,23 +96,14 @@ async function homeView() {
   </div>${heroDemoHTML()}</section>
   <section class="choices">
     <div class="card choice lilacy pop" style="--i:1">
+      <span class="choice-tag">${L('עכשיו, בזמן אמת','Right now, live')}</span>
       <div class="big">🎧</div>
-      <h2>${L('האזנה חיה','Live listening')}</h2>
-      <p class="muted">${L("בזום (גם עם אוזניות) או בהרצאה בכיתה דרך המיקרופון: מתמללת, מסכמת תוך כדי ומקפיצה התראה כשאומרים את השם שלך.", "In a Zoom (headphones too) or in a class through the microphone: transcribes, summarizes as it goes and alerts you when someone says your name.")}</p>
-      <a class="btn lilac" href="#/live">${L('התחילי להקשיב','Start listening')}</a>
+      <h2>${L('האזנה בזמן אמת','Live listening')}</h2>
+      <p class="muted">${L("כפתור אחד לכל מה שקורה עכשיו: זום, שיעור אונליין או הרצאה בכיתה. בשלב הבא בוחרים מאיפה להקשיב.", "One button for anything happening now: Zoom, an online class or a lecture in the room. You choose where to listen in the next step.")}</p>
+      <ul class="choice-list"><li>💻 ${L('זום או שיעור אונליין','Zoom or online class')}</li><li>🎓 ${L('הרצאה בכיתה','Lecture in the room')}</li><li>✨ ${L('זום שגם את מדברת בו','A Zoom you talk in too')}</li></ul>
+      <a class="btn lilac" href="#/live">${L('🎧 להאזנה בזמן אמת','🎧 Start live listening')}</a>
     </div>
-    <div class="card choice peachy pop" style="--i:2">
-      <div class="big">🎬</div>
-      <h2>${L('סיכום מהקלטה','Summarize a recording')}</h2>
-      <p class="muted">${L("יש לך הקלטה של זום, הרצאה או שיעור (גם מהטלפון)? גררי אותה לכאן וקבלי תמלול וסיכום מלא.", "Have a recording of a Zoom, lecture or class (even from your phone)? Drop it here for a full transcript and summary.")}</p>
-      <label class="drop" id="drop">
-        <input type="file" id="file" class="vh" accept="audio/*,video/*,.mkv">
-        <b>${L("גררי קובץ או לחצי לבחירה", "Drop a file or click to choose")}</b><br><span class="muted">${L("mp4, m4a, mp3, wav ועוד", "mp4, m4a, mp3, wav and more")}</span>
-      </label>
-      <label class="field">${L("שפת ההקלטה", "Recording language")}
-        <select id="lang"><option value="he">${L('עברית','Hebrew')}</option><option value="en">${L('אנגלית','English')}</option><option value="">${L('זיהוי אוטומטי','Auto detect')}</option></select>
-      </label>
-    </div>
+    ${uploadCardHTML()}
   </section>
   <section class="steps">
     <div class="step card pop" style="--i:3"><span class="n">1</span><div><b>${L('מקליטים','Record')}</b><br><span class="muted">${L("מהמחשב או מקובץ קיים", "From your computer or a file")}</span></div></div>
@@ -99,21 +114,53 @@ async function homeView() {
   <div class="lib" id="recent"></div>`;
   cleanup = heroDemo();
 
-  api('/api/health').then((h) => {
+  const loadHealth = () => api('/api/health').then((h) => {
+    if (!$('#health')) return;
     if (h.demo) { $('#health').innerHTML = `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">🧪 ${L('מצב הדגמה: נתונים לדוגמה, בלי הקלטה אמיתית','Demo mode: sample data, no real recording')}</span><a class="chip" href="https://github.com/NoyaAdivi/kashuv/releases/latest">⬇️ ${L('להתקנה המלאה במחשב','Get the full app')}</a><button class="chip" type="button" id="tour-btn">🧭 ${L('סיור קצר','Quick tour')}</button>`; $('#tour-btn').addEventListener('click', () => tour(true)); return; }
     $('#health').innerHTML = `
       <span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">🎙️ ${L('תמלול','Transcription')}: ${h.loaded ? L('מוכן','ready') : L('ייטען בשימוש הראשון','loads on first use')}</span>
-      ${h.ollama.running && h.ollama.model ? `<span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">✨ ${L('סיכומים','Summaries')}: ${esc(h.ollama.name)} ${L('מוכן','ready')}</span>`
-        : `<span class="chip" style="--c:var(--warn);--c-soft:var(--warn-soft)">⚠️ ${h.ollama.running ? L(`חסר המודל ${esc(h.ollama.name)} ב-Ollama`, `Model ${esc(h.ollama.name)} is missing in Ollama`) : L('Ollama לא פועל, אין סיכומים','Ollama is not running, no summaries')}</span>`}`;
+      ${h.ollama.running && h.ollama.model ? `<span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">✨ ${L('סיכומים','Summaries')}: ${L('מוכן','ready')}</span>`
+        : h.ollama.running ? `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">⬇️ ${L('מורידה את מודל הסיכומים, פעם אחת בלבד','Downloading the summary model, one time only')} ${h.ollama.pulling ? Math.round(h.ollama.progress * 100) + '%' : ''}</span>`
+        : `<a class="chip" href="https://ollama.com/download" target="_blank" rel="noopener" style="--c:var(--warn);--c-soft:var(--warn-soft)">⚠️ ${L('לסיכומים צריך את Ollama (חינם). לחצי להורדה','Summaries need Ollama (free). Click to download')}</a>`}`;
+    if (h.ollama.running && !h.ollama.model) setTimeout(loadHealth, 3000);  // keep the download progress fresh
   }).catch(() => {});
+  loadHealth();
   renderLib($('#recent'), (await api('/api/sessions')).slice(0, 6));
   if (DEMO) setTimeout(() => location.hash.length < 3 && tour(), 900);
 
+  bindUpload();
+}
+
+function uploadCardHTML() {
+  return `<div class="card choice peachy pop" style="--i:2">
+      <span class="choice-tag">${L('כבר נגמר, יש קובץ','Already over, have a file')}</span>
+      <div class="big">🎬</div>
+      <h2>${L('סיכום מהקלטה','Summarize a recording')}</h2>
+      <p class="muted">${L("יש לך הקלטה של זום, הרצאה או שיעור (גם מהטלפון)? גררי אותה לכאן וקבלי תמלול וסיכום מלא.", "Have a recording of a Zoom, lecture or class (even from your phone)? Drop it here for a full transcript and summary.")}</p>
+      <label class="drop" id="drop">
+        <input type="file" id="file" class="vh" accept="audio/*,video/*,.mkv">
+        <b>${L("גררי קובץ או לחצי לבחירה", "Drop a file or click to choose")}</b><br><span class="muted">${L("mp4, m4a, mp3, wav ועוד", "mp4, m4a, mp3, wav and more")}</span>
+      </label>
+      <label class="field">${L("שפת ההקלטה", "Recording language")}
+        <select id="lang"><option value="he">${L('עברית','Hebrew')}</option><option value="en">${L('אנגלית','English')}</option></select>
+      </label>
+    </div>`;
+}
+
+function bindUpload() {
   const drop = $('#drop'), file = $('#file');
   ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove('over')));
   drop.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]); });
   file.addEventListener('change', () => file.files[0] && upload(file.files[0]));
+}
+
+function uploadView() {
+  main.innerHTML = `<section class="upload-page">
+    <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>${L('סיכום מהקלטה','Summarize a recording')}</h1>
+    <p>${L('בשביל זום או הרצאה שכבר נגמרו. בשביל משהו שקורה עכשיו, ','For a Zoom or lecture that is already over. For something happening now, ')}<a href="#/live">${L('עברי להאזנה בזמן אמת','go to live listening')}</a>.</p></div>
+    <div class="choices one">${uploadCardHTML()}</div></section>`;
+  bindUpload();
 }
 
 function upload(f) {
@@ -195,23 +242,28 @@ async function liveView() {
   if (running) return liveRun(running);
   main.innerHTML = `
   <section class="live-setup">
-    <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>${L('האזנה חיה','Live listening')}</h1>
-    <p>${L("בחרי מאיפה להקשיב ולחצי התחלה. עובד עם רמקולים, אוזניות חוטיות ואוזניות בלוטות'.", "Choose where to listen from and press start. Works with speakers, wired and Bluetooth headphones.")}</p></div>
+    <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>${L('האזנה בזמן אמת','Live listening')}</h1>
+    <p>${L("אותו מקום לזום ולהרצאה בכיתה. בחרי מאיפה להקשיב, וזהו. עובד עם רמקולים, אוזניות חוטיות ואוזניות בלוטות'.", "The same place for a Zoom and a lecture in the room. Choose where to listen from, that is all. Works with speakers, wired and Bluetooth headphones.")}</p>
+    <p class="muted small-note">${L('יש לך כבר הקלטה? ','Already have a recording? ')}<a href="#/upload">${L('לסיכום מהקלטה ←','Summarize a recording →')}</a></p></div>
     <div class="card grid">
-      <label class="field">${L('שם השיעור או הפגישה','Class or meeting name')} <input id="title" placeholder="${L('למשל: מבני נתונים, הרצאה 5','e.g. Data Structures, lecture 5')}"></label>
-      <label class="field">${L('השם שלך (בשביל התראה כשקוראים לך)','Your name (for an alert when you are called)')} <input id="name" placeholder="${L('השם שלך','Your name')}"></label>
-      <label class="field">${L('שפה','Language')} <select id="lang"><option value="he">${L('עברית','Hebrew')}</option><option value="en">${L('אנגלית','English')}</option><option value="">${L('זיהוי אוטומטי','Auto detect')}</option></select></label>
-      <fieldset class="sources"><legend>${L('מאיפה להקשיב?', 'Where should I listen?')}</legend>
+      <fieldset class="sources"><legend><span class="step-n">1</span> ${L('מאיפה להקשיב?', 'Where should I listen?')}</legend>
         ${[['computer', '💻', L('זום או שיעור אונליין', 'Zoom or online class'), L('הקול של המחשב, גם באוזניות', 'Computer sound, headphones too')],
            ['class', '🎓', L('הרצאה בכיתה', 'Lecture in class'), L('המיקרופון של המחשב', 'Your computer microphone')],
            ['both', '✨', L('זום ואני מדברת', 'Zoom and I talk too'), L('המחשב והמיקרופון יחד', 'Computer and microphone together')]]
           .map(([v, e, t, d], i) => `<label class="source pop" style="--i:${i}"><input type="radio" name="source" value="${v}"${i ? '' : ' checked'}><span class="ico">${e}</span><b>${t}</b><small>${d}</small></label>`).join('')}
       </fieldset>
+      <p class="form-step"><span class="step-n">2</span> ${L('פרטים (לא חובה)', 'Details (optional)')}</p>
+      <label class="field">${L('שם השיעור או הפגישה','Class or meeting name')} <input id="title" placeholder="${L('למשל: מבני נתונים, הרצאה 5','e.g. Data Structures, lecture 5')}"></label>
+      <label class="field">${L('השם שלך (בשביל התראה כשקוראים לך)','Your name (for an alert when you are called)')} <input id="name" placeholder="${L('השם שלך','Your name')}"></label>
+      <label class="field">${L('שפה','Language')} <select id="lang"><option value="he">${L('עברית','Hebrew')}</option><option value="en">${L('אנגלית','English')}</option></select></label>
       <p class="note">${L("💛 חשוב: ספרי למשתתפים ולמרצה שאת מקליטה ומתמללת. ההקלטה נשמרת רק במחשב שלך.", "💛 Important: tell the participants and the lecturer that you are recording. The recording stays on your computer.")}</p>
-      <button class="btn lilac" id="go">${L("🎧 התחילי להקשיב", "🎧 Start listening")}</button>
+      <button class="btn lilac" id="go"></button>
     </div>
   </section>`;
-  try { const p = JSON.parse(localStorage.getItem('kashuv-live-prefs') || '{}'); if (p.name) $('#name').value = p.name; if (p.lang != null) $('#lang').value = p.lang; if (p.source) { const r = main.querySelector(`[name=source][value=${p.source}]`); if (r) r.checked = true; } } catch (e) {}
+  try { const p = JSON.parse(localStorage.getItem('kashuv-live-prefs') || '{}'); if (p.name) $('#name').value = p.name; if (p.lang) $('#lang').value = p.lang; if (p.source) { const r = main.querySelector(`[name=source][value=${p.source}]`); if (r) r.checked = true; } } catch (e) {}
+  const GO = { computer: L('💻 התחילי להקשיב לזום', '💻 Start listening to the Zoom'), class: L('🎓 התחילי להקשיב להרצאה', '🎓 Start listening to the lecture'), both: L('✨ התחילי להקשיב לזום ולי', '✨ Start listening to the Zoom and me') };
+  const setGo = () => { $('#go').textContent = GO[main.querySelector('[name=source]:checked').value]; };
+  main.querySelectorAll('[name=source]').forEach((r) => r.addEventListener('change', setGo)); setGo();
   $('#go').addEventListener('click', async () => {
     const body = { title: $('#title').value, name: $('#name').value, lang: $('#lang').value, source: main.querySelector('[name=source]:checked').value };
     try { localStorage.setItem('kashuv-live-prefs', JSON.stringify({ name: body.name, lang: body.lang, source: body.source })); } catch (e) {}
@@ -240,7 +292,7 @@ function liveRun(id) {
   <div id="lerr"></div>
   <div class="live-grid">
     <section class="card stream-card"><h2 style="font-size:1.2rem;margin-bottom:10px">${L("📝 תמלול חי", "📝 Live transcript")}</h2>
-      <div class="stream" id="stream" aria-live="polite"><p class="muted" id="wait">${L("מחכה שמישהו ידבר. בפעם הראשונה מודל התמלול נטען וזה לוקח כמה דקות.", "Waiting for someone to speak. The first time, the speech model loads and this takes a few minutes.")}</p></div></section>
+      <div class="stream" id="stream" aria-live="polite"><p class="muted" id="wait">${L("מקשיבה 🎧 הטקסט מופיע כאן בערך כל חצי דקה. בפעם הראשונה מודל התמלול נטען, וזה יכול לקחת כמה דקות.", "Listening 🎧 Text appears here about every half minute. The first time, the speech model loads and this can take a few minutes.")}</p></div></section>
     <aside class="side">
       <div class="card now"><h3>${L('עכשיו מדברים על','Talking about now')}</h3><p id="now">${L("עוד רגע יופיע כאן 🙂", "Coming up in a moment 🙂")}</p>
         <button class="btn soft small" id="refresh" style="margin-top:12px">${L("✨ רענני סיכום עכשיו", "✨ Refresh summary now")}</button></div>
@@ -304,7 +356,8 @@ function liveRun(id) {
     catch (e) { $('#missed').textContent = e.message; }
   }));
   $('#mark').addEventListener('click', async () => {
-    const note = prompt(L('מה חשוב פה? (אפשר להשאיר ריק)','What matters here? (optional)')) ?? '';
+    const note = await ask(L('⭐ מה חשוב ברגע הזה? (אפשר להשאיר ריק)','⭐ What matters here? (optional)'), { ok: L('סמני את הרגע','Mark it'), input: '' });
+    if (note === null) return;
     await api(`/api/live/${id}/mark`, { method: 'POST', body: { note } }); toast(L('⭐ סימנתי את הרגע','⭐ Moment marked'));
   });
   $('#refresh').addEventListener('click', () => { api(`/api/live/${id}/refresh`, { method: 'POST' }); toast(L('✨ מעדכנת את הסיכום','✨ Updating the summary')); });
@@ -313,7 +366,7 @@ function liveRun(id) {
     toast(on ? L('🎯 מצב ריכוז: רק מה שחשוב','🎯 Focus mode: only what matters') : L('חזרנו לתצוגה המלאה','Back to the full view'));
   });
   $('#stop').addEventListener('click', async () => {
-    if (!confirm(L('לסיים את ההקלטה ולבנות סיכום מלא?','Stop recording and build a full summary?'))) return;
+    if (!await ask(L('לסיים את ההקלטה ולבנות סיכום מלא?','Stop recording and build a full summary?'), { ok: L('סיימי וסכמי','Stop and summarize'), cancel: L('להמשיך להקשיב','Keep listening') })) return;
     alive = false;
     const j = await api(`/api/live/${id}/stop`, { method: 'POST' });
     store.set('kashuv-live', null); document.body.classList.remove('focus');
@@ -452,13 +505,13 @@ async function summaryView(id, at) {
   });
   $('#copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText(markdown()); toast(L('📋 הועתק','📋 Copied')); } catch (e) { toast(L('לא הצלחתי להעתיק','Could not copy')); } });
   $('#rename').addEventListener('click', async () => {
-    const t = prompt(L('שם חדש לסיכום:', 'New name for this summary:'), m.title || s.name);
+    const t = await ask(L('שם חדש לסיכום:', 'New name for this summary:'), { ok: L('שמירה','Save'), input: m.title || s.name });
     if (!t || !t.trim()) return;
     try { await api(`/api/sessions/${id}/rename`, { method: 'POST', body: { title: t.trim() } }); toast(L('✏️ השם עודכן', '✏️ Renamed')); route(); } catch (e) { toast(e.message); }
   });
   $('#again').addEventListener('click', async () => { const j = await api(`/api/sessions/${id}/resummarize`, { method: 'POST' }); watchJob(j.job, id); });
   $('#del').addEventListener('click', async () => {
-    if (!confirm(L('למחוק את הסיכום וההקלטה לגמרי?','Delete this summary and recording for good?'))) return;
+    if (!await ask(L('למחוק את הסיכום וההקלטה לגמרי? אי אפשר לבטל את זה.','Delete this summary and recording for good? This cannot be undone.'), { ok: L('מחיקה','Delete'), danger: true })) return;
     await api('/api/sessions/' + id, { method: 'DELETE' }); toast(L('נמחק','Deleted')); location.hash = '#/library';
   });
 }

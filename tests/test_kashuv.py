@@ -45,7 +45,7 @@ def test_fmt_time_and_transcript():
 def test_long_transcripts_are_summarized_in_parts(monkeypatch):
     calls = []
 
-    def fake_chat(system, user, json_mode=True, timeout=0):
+    def fake_chat(system, user, json_mode=True, timeout=0, **k):
         calls.append(user)
         return {"title": "Final", "sections": [{"title": "s", "bullets": ["b"]}]} if "המבנה" in user else {"points": ["p"]}
     monkeypatch.setattr(summarize, "chat", fake_chat)
@@ -99,6 +99,7 @@ def test_health_when_ollama_is_off(client, monkeypatch):
 
 
 def test_resummarize_clears_partial_flag(client, monkeypatch):
+    monkeypatch.setattr(summarize, "ensure_model", lambda *a, **k: None)
     monkeypatch.setattr(summarize, "chat", lambda *a, **k: {"title": "Done", "sections": [{"title": "s", "bullets": ["b"]}]})
     s = make_session("20260101-120000-cccc", kind="live", partial=True)
     job = client.post(f"/api/sessions/{s['id']}/resummarize").json["job"]
@@ -139,3 +140,32 @@ def test_search_finds_words_inside_transcripts(client):
     assert hits and hits[0]["t"] == 61 and hits[0]["id"] == "20260101-120000-eeee"
     assert client.get("/api/search?q=a").json == []
     assert client.get("/api/stats").status_code == 200
+
+
+def test_missing_ollama_gives_a_clear_message(monkeypatch):
+    monkeypatch.setattr(summarize.config, "OLLAMA_URL", "http://127.0.0.1:9")
+    with pytest.raises(summarize.OllamaMissing) as e:
+        summarize.ensure_model()
+    assert "ollama.com" in str(e.value)
+
+
+def test_very_long_lectures_merge_notes_in_rounds(monkeypatch):
+    calls = []
+
+    def fake_chat(system, user, json_mode=True, timeout=0, **k):
+        calls.append(user)
+        if "אחדי" in user:
+            return {"points": ["merged"]}
+        if "המבנה" in user and not user.startswith("זה חלק"):
+            return {"title": "Final", "tldr": "t", "sections": [{"title": "s", "bullets": ["b"]}]}
+        return {"points": ["נקודה ארוכה " * 200]}
+    monkeypatch.setattr(summarize, "chat", fake_chat)
+    segs = [{"start": i, "end": i + 1, "text": "מילה " * 300} for i in range(200)]
+    out = summarize.summarize(segs)
+    assert out["title"] == "Final" and any("אחדי" in c for c in calls)
+
+
+def test_clean_drops_broken_items():
+    out = summarize.clean({"quiz": [{"q": "שאלה", "a": "תשובה"}, "junk"], "concepts": [{"term": ""}, {"term": "AVL"}],
+                           "tasks": ["להגיש", None, {"x": 1}], "sections": [{"title": "a", "bullets": "not a list"}]})
+    assert len(out["quiz"]) == 1 and len(out["concepts"]) == 1 and out["tasks"] == ["להגיש"] and out["sections"] == []
