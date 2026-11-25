@@ -1,9 +1,14 @@
 """Kashuv settings. Everything runs locally and is free. Override any value with an environment variable."""
 import os
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-DATA = Path(os.getenv("KASHUV_DATA", ROOT / "data"))
+FROZEN = getattr(sys, "frozen", False)  # True inside the Kashuv.exe build
+# The site files (templates, static, sw.js) live next to the code, or inside the exe bundle.
+ROOT = Path(sys._MEIPASS) if FROZEN else Path(__file__).resolve().parent.parent
+# The installed app keeps recordings in the user's own folder, where it is always allowed to write.
+_DEFAULT_DATA = Path(os.getenv("LOCALAPPDATA", Path.home())) / "Kashuv" if FROZEN else ROOT / "data"
+DATA = Path(os.getenv("KASHUV_DATA", _DEFAULT_DATA))
 SESSIONS = DATA / "sessions"
 MEDIA = DATA / "media"
 for p in (SESSIONS, MEDIA):

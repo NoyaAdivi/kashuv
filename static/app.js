@@ -21,7 +21,9 @@ const dateHe = (t) => new Date((t || 0) * 1000).toLocaleDateString(LANG === 'en'
 const DEMO = !!window.KASHUV_DEMO;
 const api = async (url, opts = {}) => {
   if (DEMO) return window.demoApi(url, opts, LANG);
-  const r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts, body: opts.body && JSON.stringify(opts.body) });
+  let r;
+  try { r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts, body: opts.body && JSON.stringify(opts.body) }); }
+  catch (e) { throw new Error(L('Kashuv לא פועל כרגע. פתחי את Kashuv מחדש ונסי שוב', 'Kashuv is not running. Open Kashuv again and try once more')); }
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || L("משהו השתבש", "Something went wrong"));
   return j;
@@ -98,7 +100,7 @@ async function homeView() {
   cleanup = heroDemo();
 
   api('/api/health').then((h) => {
-    if (h.demo) { $('#health').innerHTML = `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">🧪 ${L('מצב הדגמה: נתונים לדוגמה, בלי הקלטה אמיתית','Demo mode: sample data, no real recording')}</span><a class="chip" href="https://github.com/NoyaAdivi/kashuv#run-locally">⬇️ ${L('להתקנה המלאה במחשב','Get the full app')}</a><button class="chip" type="button" id="tour-btn">🧭 ${L('סיור קצר','Quick tour')}</button>`; $('#tour-btn').addEventListener('click', () => tour(true)); return; }
+    if (h.demo) { $('#health').innerHTML = `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">🧪 ${L('מצב הדגמה: נתונים לדוגמה, בלי הקלטה אמיתית','Demo mode: sample data, no real recording')}</span><a class="chip" href="https://github.com/NoyaAdivi/kashuv/releases/latest">⬇️ ${L('להתקנה המלאה במחשב','Get the full app')}</a><button class="chip" type="button" id="tour-btn">🧭 ${L('סיור קצר','Quick tour')}</button>`; $('#tour-btn').addEventListener('click', () => tour(true)); return; }
     $('#health').innerHTML = `
       <span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">🎙️ ${L('תמלול','Transcription')}: ${h.loaded ? L('מוכן','ready') : L('ייטען בשימוש הראשון','loads on first use')}</span>
       ${h.ollama.running && h.ollama.model ? `<span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">✨ ${L('סיכומים','Summaries')}: ${esc(h.ollama.name)} ${L('מוכן','ready')}</span>`

@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 from kashuv import config, storage, summarize, transcribe
 from kashuv.live import Live
 
-app = Flask(__name__)
+app = Flask(__name__, root_path=str(config.ROOT), template_folder="templates", static_folder="static")
 app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 ** 3  # 4 GB recordings
 jobs, lives = {}, {}
 MEDIA_TYPES = {".mp4", ".m4a", ".mp3", ".wav", ".webm", ".mkv", ".mov", ".ogg", ".aac", ".flac"}
