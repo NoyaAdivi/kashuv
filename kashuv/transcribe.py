@@ -54,7 +54,9 @@ def transcribe_file(path, language="he", on_progress=None):
     audio = decode(path)
     duration = len(audio) / 16000
     with _run_lock:
-        segments, _ = model.transcribe(audio, language=_key(language), vad_filter=True, beam_size=1)  # greedy: about 3x faster on a laptop, same quality in tests
+        # greedy and without chaining the previous text: much faster on a laptop, and no repeated-text loops
+        segments, _ = model.transcribe(audio, language=_key(language), vad_filter=True, beam_size=1,
+                                       condition_on_previous_text=False)
         out = []
         for s in segments:
             text = s.text.strip()

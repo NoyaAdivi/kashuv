@@ -257,7 +257,10 @@ def summarize(segments, on_progress=None, lang="he"):
     todo = re.compile(r"להגיש|הגשה|מטלה|תרגיל|שיעורי בית|לקרוא|לתרגל|לפתור|לסיים|להכין|בוחן|מבחן|עד יום|עד ה|דדליין|submit|due|homework|assignment|read|practice|quiz|exam|deadline", re.I)
     out["tasks"] = [t for t in out["tasks"] if todo.search(t)]
     max_sec = max((s.get("end", 0) for s in segments), default=0)
-    out["timeline"] = [x for x in out["timeline"] if _time_ok(x.get("time"), max_sec)]
+    tl = [x for x in out["timeline"] if _time_ok(x.get("time"), max_sec)]
+    if len(tl) > 10:  # keep the timeline readable: 10 evenly spread moments
+        tl = [tl[round(i * (len(tl) - 1) / 9)] for i in range(10)]
+    out["timeline"] = tl
     return out
 
 

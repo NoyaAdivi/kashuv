@@ -55,7 +55,9 @@ def finish(job, session):
     job.update(status="model", step="", progress=0.0)
     summarize.ensure_model(lambda p: job.update(progress=p))
     job.update(status="summarizing", step="כותבת סיכום מטורף", progress=0.0)
-    session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=p), session.get("lang", "he"))
+    # the bar only moves forward, even when a step is retried
+    session["summary"] = summarize.summarize(session["segments"], lambda p: job.update(progress=max(job["progress"], p)),
+                                             session.get("lang", "he"))
     storage.save(session)
     job["session"] = session["id"]
 
@@ -246,8 +248,13 @@ def warm_up():
 
 
 if __name__ == "__main__":
+    import logging
+    import flask.cli
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)  # a calm window instead of a line per request
+    flask.cli.show_server_banner = lambda *a, **k: None
     url = f"http://localhost:{config.PORT}"
-    print(f"\n  Kashuv is running at {url}\n")
+    print(f"\n  Kashuv is running at {url}")
+    print("  Keep this window open while you use Kashuv. Close it to quit.\n")
     threading.Timer(1.2, lambda: webbrowser.open(url)).start()
     threading.Thread(target=warm_up, daemon=True).start()  # warm up so the first lecture starts fast
     summarize.ensure_model_background()  # download the summary model ahead of time if it is missing
