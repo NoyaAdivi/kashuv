@@ -136,7 +136,7 @@ function uploadCardHTML() {
       <span class="choice-tag">${L('כבר נגמר, יש קובץ','Already over, have a file')}</span>
       <div class="big">🎬</div>
       <h2>${L('סיכום מהקלטה','Summarize a recording')}</h2>
-      <p class="muted">${L("יש לך הקלטה של זום, הרצאה או שיעור (גם מהטלפון)? גררו אותה לכאן וקבלו תמלול וסיכום מלא.", "Have a recording of a Zoom, lecture or class (even from your phone)? Drop it here for a full transcript and summary.")}</p>
+      <p class="muted">${L("יש לכם הקלטה של זום, הרצאה או שיעור? גם הקלטה מהטלפון מתאימה. גררו אותה לכאן וקבלו תמלול וסיכום מלא.", "Have a recording of a Zoom, lecture or class (even from your phone)? Drop it here for a full transcript and summary.")}</p>
       <label class="drop" id="drop">
         <input type="file" id="file" class="vh" accept="audio/*,video/*,.mkv">
         <b>${L("גררו קובץ או לחצו לבחירה", "Drop a file or click to choose")}</b><br><span class="muted">${L("mp4, m4a, mp3, wav ועוד", "mp4, m4a, mp3, wav and more")}</span>
@@ -244,7 +244,7 @@ async function liveView() {
   <section class="live-setup">
     <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>${L('האזנה בזמן אמת','Live listening')}</h1>
     <p>${L("אותו מקום לזום ולהרצאה בכיתה. בחרו מאיפה להקשיב, וזהו. עובד עם רמקולים, אוזניות חוטיות ואוזניות בלוטות'.", "The same place for a Zoom and a lecture in the room. Choose where to listen from, that is all. Works with speakers, wired and Bluetooth headphones.")}</p>
-    <p class="muted small-note">${L('יש לך כבר הקלטה? ','Already have a recording? ')}<a href="#/upload">${L('לסיכום מהקלטה ←','Summarize a recording →')}</a></p></div>
+    <p class="muted small-note">${L('יש לכם כבר הקלטה? ','Already have a recording? ')}<a href="#/upload">${L('לסיכום מהקלטה ←','Summarize a recording →')}</a></p></div>
     <div class="card grid">
       <fieldset class="sources"><legend><span class="step-n">1</span> ${L('מאיפה להקשיב?', 'Where should I listen?')}</legend>
         ${[['computer', '💻', L('זום או שיעור אונליין', 'Zoom or online class'), L('הקול של המחשב, גם באוזניות', 'Computer sound, headphones too')],
