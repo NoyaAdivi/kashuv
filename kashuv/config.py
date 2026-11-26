@@ -25,6 +25,6 @@ CPU_THREADS = int(os.getenv("KASHUV_THREADS", max(2, (os.cpu_count() or 4) - 1))
 OLLAMA_URL = os.getenv("KASHUV_OLLAMA", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("KASHUV_LLM", "gemma3:4b")
 
-LIVE_CHUNK_SECONDS = int(os.getenv("KASHUV_CHUNK", "25"))  # Whisper works on 30s windows: longer chunks keep live mode real time
+LIVE_CHUNK_SECONDS = int(os.getenv("KASHUV_CHUNK", "28"))  # Whisper works on 30s windows: longer chunks keep live mode real time
 LIVE_SUMMARY_EVERY = int(os.getenv("KASHUV_LIVE_SUMMARY_EVERY", "180"))  # seconds
 PORT = int(os.getenv("KASHUV_PORT", "5170"))

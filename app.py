@@ -1,13 +1,24 @@
 """Kashuv: free, local Zoom transcription, live focus helpers and beautiful summaries."""
+import logging
+import os
 import threading
 import time
+import warnings
+
+# A calm window for users: no download bars or library notices from the model hub.
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+os.environ.setdefault("HF_HUB_DISABLE_IMPLICIT_TOKEN", "1")
+warnings.filterwarnings("ignore", module=r"huggingface_hub(\..*)?")
+warnings.filterwarnings("ignore", message=".*HF_TOKEN.*")
+logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
 import uuid
 import webbrowser
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory, render_template, abort
 from werkzeug.utils import secure_filename
 
-from kashuv import config, storage, summarize, transcribe
+from kashuv import draft, config, storage, summarize, transcribe
 from kashuv.live import Live
 
 app = Flask(__name__, root_path=str(config.ROOT), template_folder="templates", static_folder="static")
@@ -248,7 +259,6 @@ def warm_up():
 
 
 if __name__ == "__main__":
-    import logging
     import flask.cli
     logging.getLogger("werkzeug").setLevel(logging.ERROR)  # a calm window instead of a line per request
     flask.cli.show_server_banner = lambda *a, **k: None
@@ -258,4 +268,5 @@ if __name__ == "__main__":
     threading.Timer(1.2, lambda: webbrowser.open(url)).start()
     threading.Thread(target=warm_up, daemon=True).start()  # warm up so the first lecture starts fast
     summarize.ensure_model_background()  # download the summary model ahead of time if it is missing
+    draft.load_background()  # the small model for instant live captions
     app.run(port=config.PORT, threaded=True)

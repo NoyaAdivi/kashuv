@@ -334,6 +334,21 @@ function liveRun(id) {
       if (atBottom) st.scrollTop = st.scrollHeight;
       since = s.count;
     }
+    // instant grey draft from the small model, replaced by the accurate text when it is ready
+    let dr = $('#draftline');
+    if (s.draft && s.draft.text) {
+      $('#wait')?.remove();
+      const st = $('#stream'), atBottom = st.scrollHeight - st.scrollTop - st.clientHeight < 80;
+      if (!dr) {
+        dr = document.createElement('div');
+        dr.id = 'draftline'; dr.className = 'line draft'; dr.setAttribute('aria-hidden', 'true');
+        dr.innerHTML = `<time></time><span></span><em class="draft-tag">${L('טיוטה מהירה','Quick draft')}</em>`;
+      }
+      dr.querySelector('time').textContent = fmt(s.draft.t);
+      dr.querySelector('span').textContent = s.draft.text;
+      st.append(dr);  // always the last line
+      if (atBottom) st.scrollTop = st.scrollHeight;
+    } else dr?.remove();
     if (s.summary.now) $('#now').textContent = s.summary.now;
     if (s.summary.points.length) list($('#points'), s.summary.points);
     list($('#qs'), s.summary.questions);

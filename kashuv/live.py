@@ -14,6 +14,7 @@ import warnings
 import numpy as np
 from . import config, summarize, storage
 from .transcribe import transcribe_chunk
+from . import draft
 
 warnings.filterwarnings("ignore", message="data discontinuity")  # harmless gaps reported by Windows loopback
 RATE = 48000  # what sound cards like
@@ -43,7 +44,10 @@ class Live:
         self._last_roll = time.time()
         self._rolling = False
         self._done = threading.Event()
-        self._closed = False  # set once the final session is handed over, so autosave never overwrites it
+        self._closed = False
+        self._recent = collections.deque()  # (start time, audio) of the last seconds, for the instant draft
+        self._final_t = 0.0  # everything before this time already has accurate text
+        self.draft = {"t": 0, "text": ""}  # set once the final session is handed over, so autosave never overwrites it
         self.audio_name = f"{sid}.wav"
         self._wav = wave.open(str(config.MEDIA / self.audio_name), "wb")
         self._wav.setnchannels(1)
@@ -51,6 +55,8 @@ class Live:
         self._wav.setframerate(OUT)
         threading.Thread(target=self._capture, daemon=True).start()
         threading.Thread(target=self._work, daemon=True).start()
+        if lang != "en":  # the draft model is Hebrew only
+            threading.Thread(target=self._drafter, daemon=True).start()
 
     def elapsed(self):
         return time.time() - self.started
@@ -117,6 +123,9 @@ class Live:
                 self.levels.append(round(self.level, 4))
                 self.lcount += 1
                 self._wav.writeframes((block * 32767).astype(np.int16).tobytes())
+                self._recent.append((self.elapsed() - n / OUT, block))
+                while self._recent and self._recent[0][0] < self.elapsed() - 35:
+                    self._recent.popleft()
                 chunk.append(block)
                 have += n
                 if have >= need:
@@ -136,7 +145,9 @@ class Live:
             if item is None:
                 break
             t0, audio = item
+            done_until = t0 + len(audio) / OUT
             if float(np.sqrt(np.mean(audio ** 2))) < 0.002:
+                self._final_t = max(self._final_t, done_until)
                 continue  # silence
             try:
                 segs = transcribe_chunk(audio, self.lang)
@@ -149,7 +160,29 @@ class Live:
                 self._pending.append(f"[{summarize.fmt_time(seg['start'])}] {text}")
                 if any(n in text for n in self.names):
                     self.alerts.append({"t": seg["start"], "text": text})
+            self._final_t = max(self._final_t, done_until)
+            self.draft = {"t": self._final_t, "text": ""}  # the accurate text now covers it
             self.autosave()
+
+    def _drafter(self):
+        """Every ~3 seconds: a quick draft of what was said since the last accurate text."""
+        if draft.load() is None:
+            return  # no internet the first time, or the model failed: live mode simply works without drafts
+        while self.running:
+            time.sleep(3)  # often enough to feel live, light enough that the accurate text keeps its pace
+            parts = [(t, b) for t, b in list(self._recent) if t + len(b) / OUT > self._final_t]
+            if not parts:
+                continue
+            start = max(parts[0][0], self._final_t)
+            audio = np.concatenate([b for _, b in parts])[-int(28 * OUT):]
+            if len(audio) < OUT or float(np.sqrt(np.mean(audio ** 2))) < 0.003:
+                continue
+            try:
+                text = draft.transcribe(audio)
+            except Exception:
+                return
+            if start >= self._final_t - 1:  # still newer than the accurate text
+                self.draft = {"t": round(start, 1), "text": text}
             # refresh the live summary only when transcription is caught up, so the text never falls behind
             if self._pending and not self._rolling and self._q.empty() and time.time() - self._last_roll > config.LIVE_SUMMARY_EVERY:
                 self.roll()
@@ -193,7 +226,8 @@ class Live:
     def state(self, since=0):
         return {"status": self.status, "error": self.error, "elapsed": round(self.elapsed()),
                 "level": round(self.level, 4), "levels": list(self.levels)[-80:], "lcount": self.lcount, "segments": self.segments[since:], "count": len(self.segments),
-                "alerts": self.alerts, "marks": self.marks, "summary": self.summary, "rolling": self._rolling}
+                "alerts": self.alerts, "marks": self.marks, "summary": self.summary, "rolling": self._rolling,
+                "draft": self.draft}
 
     def stop(self, on_progress=None):
         self.running = False
