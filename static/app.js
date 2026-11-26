@@ -24,7 +24,7 @@ const api = async (url, opts = {}) => {
   if (DEMO) return window.demoApi(url, opts, LANG);
   let r;
   try { r = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts, body: opts.body && JSON.stringify(opts.body) }); }
-  catch (e) { throw new Error(L('Kashuv לא פועל כרגע. פתחי את Kashuv מחדש ונסי שוב', 'Kashuv is not running. Open Kashuv again and try once more')); }
+  catch (e) { throw new Error(L('Kashuv לא פועל כרגע. פתחו את Kashuv מחדש ונסו שוב', 'Kashuv is not running. Open Kashuv again and try once more')); }
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || L("משהו השתבש", "Something went wrong"));
   return j;
@@ -90,8 +90,8 @@ async function homeView() {
   main.innerHTML = `
   <section class="hero hero-split"><div class="hero-text">
     <div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div>
-    <h1>${L("להיות <em>קשובה</em> בכל זום, הרצאה ושיעור", "Stay <em>focused</em> in every Zoom, lecture and class")}</h1>
-    <p>${L("תמלול בזמן אמת, עזרה להתרכז, וסיכומים מטורפים שנראים כמו מחברת של התלמידה הכי טובה בכיתה. חינם, ובמחשב שלך.", "Live transcription, focus helpers and stunning summaries that look like the notes of the best student in class. Free, and on your own computer.")}</p>
+    <h1>${L("להיות <em>קשובים</em> בכל זום, הרצאה ושיעור", "Stay <em>focused</em> in every Zoom, lecture and class")}</h1>
+    <p>${L("תמלול בזמן אמת, עזרה להתרכז, וסיכומים מטורפים שנראים כמו המחברת הכי טובה בכיתה. חינם, ובמחשב שלך.", "Live transcription, focus helpers and stunning summaries that look like the notes of the best student in class. Free, and on your own computer.")}</p>
     <div class="status-row" id="health"><span class="chip">${L("בודקת מערכת", "Checking system")}<span class="dots"></span></span></div>
   </div>${heroDemoHTML()}</section>
   <section class="choices">
@@ -100,7 +100,7 @@ async function homeView() {
       <div class="big">🎧</div>
       <h2>${L('האזנה בזמן אמת','Live listening')}</h2>
       <p class="muted">${L("כפתור אחד לכל מה שקורה עכשיו: זום, שיעור אונליין או הרצאה בכיתה. בשלב הבא בוחרים מאיפה להקשיב.", "One button for anything happening now: Zoom, an online class or a lecture in the room. You choose where to listen in the next step.")}</p>
-      <ul class="choice-list"><li>💻 ${L('זום או שיעור אונליין','Zoom or online class')}</li><li>🎓 ${L('הרצאה בכיתה','Lecture in the room')}</li><li>✨ ${L('זום שגם את מדברת בו','A Zoom you talk in too')}</li></ul>
+      <ul class="choice-list"><li>💻 ${L('זום או שיעור אונליין','Zoom or online class')}</li><li>🎓 ${L('הרצאה בכיתה','Lecture in the room')}</li><li>✨ ${L('זום שגם אתם מדברים בו','A Zoom you talk in too')}</li></ul>
       <a class="btn lilac" href="#/live">${L('🎧 להאזנה בזמן אמת','🎧 Start live listening')}</a>
     </div>
     ${uploadCardHTML()}
@@ -121,7 +121,7 @@ async function homeView() {
       <span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">🎙️ ${L('תמלול','Transcription')}: ${h.loaded ? L('מוכן','ready') : L('ייטען בשימוש הראשון','loads on first use')}</span>
       ${h.ollama.running && h.ollama.model ? `<span class="chip" style="--c:var(--mint);--c-soft:var(--mint-soft)">✨ ${L('סיכומים','Summaries')}: ${L('מוכן','ready')}</span>`
         : h.ollama.running ? `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">⬇️ ${L('מורידה את מודל הסיכומים, פעם אחת בלבד','Downloading the summary model, one time only')} ${h.ollama.pulling ? Math.round(h.ollama.progress * 100) + '%' : ''}</span>`
-        : `<a class="chip" href="https://ollama.com/download" target="_blank" rel="noopener" style="--c:var(--warn);--c-soft:var(--warn-soft)">⚠️ ${L('לסיכומים צריך את Ollama (חינם). לחצי להורדה','Summaries need Ollama (free). Click to download')}</a>`}`;
+        : `<a class="chip" href="https://ollama.com/download" target="_blank" rel="noopener" style="--c:var(--warn);--c-soft:var(--warn-soft)">⚠️ ${L('לסיכומים צריך את Ollama (חינם). לחצו להורדה','Summaries need Ollama (free). Click to download')}</a>`}`;
     if (h.ollama.running && !h.ollama.model) setTimeout(loadHealth, 3000);  // keep the download progress fresh
   }).catch(() => {});
   loadHealth();
@@ -136,10 +136,10 @@ function uploadCardHTML() {
       <span class="choice-tag">${L('כבר נגמר, יש קובץ','Already over, have a file')}</span>
       <div class="big">🎬</div>
       <h2>${L('סיכום מהקלטה','Summarize a recording')}</h2>
-      <p class="muted">${L("יש לך הקלטה של זום, הרצאה או שיעור (גם מהטלפון)? גררי אותה לכאן וקבלי תמלול וסיכום מלא.", "Have a recording of a Zoom, lecture or class (even from your phone)? Drop it here for a full transcript and summary.")}</p>
+      <p class="muted">${L("יש לך הקלטה של זום, הרצאה או שיעור (גם מהטלפון)? גררו אותה לכאן וקבלו תמלול וסיכום מלא.", "Have a recording of a Zoom, lecture or class (even from your phone)? Drop it here for a full transcript and summary.")}</p>
       <label class="drop" id="drop">
         <input type="file" id="file" class="vh" accept="audio/*,video/*,.mkv">
-        <b>${L("גררי קובץ או לחצי לבחירה", "Drop a file or click to choose")}</b><br><span class="muted">${L("mp4, m4a, mp3, wav ועוד", "mp4, m4a, mp3, wav and more")}</span>
+        <b>${L("גררו קובץ או לחצו לבחירה", "Drop a file or click to choose")}</b><br><span class="muted">${L("mp4, m4a, mp3, wav ועוד", "mp4, m4a, mp3, wav and more")}</span>
       </label>
       <label class="field">${L("שפת ההקלטה", "Recording language")}
         <select id="lang"><option value="he">${L('עברית','Hebrew')}</option><option value="en">${L('אנגלית','English')}</option></select>
@@ -158,7 +158,7 @@ function bindUpload() {
 function uploadView() {
   main.innerHTML = `<section class="upload-page">
     <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>${L('סיכום מהקלטה','Summarize a recording')}</h1>
-    <p>${L('בשביל זום או הרצאה שכבר נגמרו. בשביל משהו שקורה עכשיו, ','For a Zoom or lecture that is already over. For something happening now, ')}<a href="#/live">${L('עברי להאזנה בזמן אמת','go to live listening')}</a>.</p></div>
+    <p>${L('בשביל זום או הרצאה שכבר נגמרו. בשביל משהו שקורה עכשיו, ','For a Zoom or lecture that is already over. For something happening now, ')}<a href="#/live">${L('עברו להאזנה בזמן אמת','go to live listening')}</a>.</p></div>
     <div class="choices one">${uploadCardHTML()}</div></section>`;
   bindUpload();
 }
@@ -243,25 +243,25 @@ async function liveView() {
   main.innerHTML = `
   <section class="live-setup">
     <div class="hero" style="padding:0"><div class="wave" aria-hidden="true">${'<b></b>'.repeat(9)}</div><h1>${L('האזנה בזמן אמת','Live listening')}</h1>
-    <p>${L("אותו מקום לזום ולהרצאה בכיתה. בחרי מאיפה להקשיב, וזהו. עובד עם רמקולים, אוזניות חוטיות ואוזניות בלוטות'.", "The same place for a Zoom and a lecture in the room. Choose where to listen from, that is all. Works with speakers, wired and Bluetooth headphones.")}</p>
+    <p>${L("אותו מקום לזום ולהרצאה בכיתה. בחרו מאיפה להקשיב, וזהו. עובד עם רמקולים, אוזניות חוטיות ואוזניות בלוטות'.", "The same place for a Zoom and a lecture in the room. Choose where to listen from, that is all. Works with speakers, wired and Bluetooth headphones.")}</p>
     <p class="muted small-note">${L('יש לך כבר הקלטה? ','Already have a recording? ')}<a href="#/upload">${L('לסיכום מהקלטה ←','Summarize a recording →')}</a></p></div>
     <div class="card grid">
       <fieldset class="sources"><legend><span class="step-n">1</span> ${L('מאיפה להקשיב?', 'Where should I listen?')}</legend>
         ${[['computer', '💻', L('זום או שיעור אונליין', 'Zoom or online class'), L('הקול של המחשב, גם באוזניות', 'Computer sound, headphones too')],
            ['class', '🎓', L('הרצאה בכיתה', 'Lecture in class'), L('המיקרופון של המחשב', 'Your computer microphone')],
-           ['both', '✨', L('זום ואני מדברת', 'Zoom and I talk too'), L('המחשב והמיקרופון יחד', 'Computer and microphone together')]]
+           ['both', '✨', L('זום וגם אני מדבר/ת', 'Zoom and I talk too'), L('המחשב והמיקרופון יחד', 'Computer and microphone together')]]
           .map(([v, e, t, d], i) => `<label class="source pop" style="--i:${i}"><input type="radio" name="source" value="${v}"${i ? '' : ' checked'}><span class="ico">${e}</span><b>${t}</b><small>${d}</small></label>`).join('')}
       </fieldset>
       <p class="form-step"><span class="step-n">2</span> ${L('פרטים (לא חובה)', 'Details (optional)')}</p>
       <label class="field">${L('שם השיעור או הפגישה','Class or meeting name')} <input id="title" placeholder="${L('למשל: מבני נתונים, הרצאה 5','e.g. Data Structures, lecture 5')}"></label>
       <label class="field">${L('השם שלך (בשביל התראה כשקוראים לך)','Your name (for an alert when you are called)')} <input id="name" placeholder="${L('השם שלך','Your name')}"></label>
       <label class="field">${L('שפה','Language')} <select id="lang"><option value="he">${L('עברית','Hebrew')}</option><option value="en">${L('אנגלית','English')}</option></select></label>
-      <p class="note">${L("💛 חשוב: ספרי למשתתפים ולמרצה שאת מקליטה ומתמללת. ההקלטה נשמרת רק במחשב שלך.", "💛 Important: tell the participants and the lecturer that you are recording. The recording stays on your computer.")}</p>
+      <p class="note">${L("💛 חשוב: ספרו למשתתפים ולמרצה שאתם מקליטים ומתמללים. ההקלטה נשמרת רק במחשב שלך.", "💛 Important: tell the participants and the lecturer that you are recording. The recording stays on your computer.")}</p>
       <button class="btn lilac" id="go"></button>
     </div>
   </section>`;
   try { const p = JSON.parse(localStorage.getItem('kashuv-live-prefs') || '{}'); if (p.name) $('#name').value = p.name; if (p.lang) $('#lang').value = p.lang; if (p.source) { const r = main.querySelector(`[name=source][value=${p.source}]`); if (r) r.checked = true; } } catch (e) {}
-  const GO = { computer: L('💻 התחילי להקשיב לזום', '💻 Start listening to the Zoom'), class: L('🎓 התחילי להקשיב להרצאה', '🎓 Start listening to the lecture'), both: L('✨ התחילי להקשיב לזום ולי', '✨ Start listening to the Zoom and me') };
+  const GO = { computer: L('💻 התחילו להקשיב לזום', '💻 Start listening to the Zoom'), class: L('🎓 התחילו להקשיב להרצאה', '🎓 Start listening to the lecture'), both: L('✨ התחילו להקשיב לזום ולי', '✨ Start listening to the Zoom and me') };
   const setGo = () => { $('#go').textContent = GO[main.querySelector('[name=source]:checked').value]; };
   main.querySelectorAll('[name=source]').forEach((r) => r.addEventListener('change', setGo)); setGo();
   $('#go').addEventListener('click', async () => {
@@ -284,7 +284,7 @@ function liveRun(id) {
       <button class="btn soft small" data-missed="10">${L("10 דק'",'10 min')}</button>
       <button class="btn soft small" id="mark">${L('⭐ רגע חשוב','⭐ Important moment')}</button>
       <button class="btn soft small" id="focus" aria-pressed="false">${L('🎯 מצב ריכוז','🎯 Focus mode')}</button>
-      <button class="btn peach small" id="stop">${L("⏹ סיימי וסכמי", "⏹ Stop & summarize")}</button>
+      <button class="btn peach small" id="stop">${L("⏹ סיימו וסכמו", "⏹ Stop & summarize")}</button>
     </div>
     <canvas class="live-wave" id="lwave" aria-hidden="true"></canvas>
   </div>
@@ -295,8 +295,8 @@ function liveRun(id) {
       <div class="stream" id="stream" aria-live="polite"><p class="muted" id="wait">${L("מקשיבה 🎧 הטקסט מופיע כאן בערך כל חצי דקה. בפעם הראשונה מודל התמלול נטען, וזה יכול לקחת כמה דקות.", "Listening 🎧 Text appears here about every half minute. The first time, the speech model loads and this can take a few minutes.")}</p></div></section>
     <aside class="side">
       <div class="card now"><h3>${L('עכשיו מדברים על','Talking about now')}</h3><p id="now">${L("עוד רגע יופיע כאן 🙂", "Coming up in a moment 🙂")}</p>
-        <button class="btn soft small" id="refresh" style="margin-top:12px">${L("✨ רענני סיכום עכשיו", "✨ Refresh summary now")}</button></div>
-      <div class="card" id="missed-card" hidden><h3>${L('🙈 מה פספסת','🙈 What you missed')}</h3><p class="missed-box" id="missed"></p></div>
+        <button class="btn soft small" id="refresh" style="margin-top:12px">${L("✨ רעננו סיכום עכשיו", "✨ Refresh summary now")}</button></div>
+      <div class="card" id="missed-card" hidden><h3>${L('🙈 מה פספסתם','🙈 What you missed')}</h3><p class="missed-box" id="missed"></p></div>
       <div class="card"><h3>${L("✦ הנקודות החשובות", "✦ Key points")}</h3><ul class="ticks" id="points"><li class="muted">${L("יתמלא תוך כמה דקות", "Fills up within a few minutes")}</li></ul></div>
       <div class="card"><h3>${L('❓ שאלות ומשימות','❓ Questions and tasks')}</h3><ul class="ticks" id="qs"></ul></div>
       <div class="card" id="alerts-card" hidden><h3>${L("📣 הזכירו אותך", "📣 You were mentioned")}</h3><ul class="ticks" id="alerts"></ul></div>
@@ -371,7 +371,7 @@ function liveRun(id) {
     catch (e) { $('#missed').textContent = e.message; }
   }));
   $('#mark').addEventListener('click', async () => {
-    const note = await ask(L('⭐ מה חשוב ברגע הזה? (אפשר להשאיר ריק)','⭐ What matters here? (optional)'), { ok: L('סמני את הרגע','Mark it'), input: '' });
+    const note = await ask(L('⭐ מה חשוב ברגע הזה? (אפשר להשאיר ריק)','⭐ What matters here? (optional)'), { ok: L('סמנו את הרגע','Mark it'), input: '' });
     if (note === null) return;
     await api(`/api/live/${id}/mark`, { method: 'POST', body: { note } }); toast(L('⭐ סימנתי את הרגע','⭐ Moment marked'));
   });
@@ -381,7 +381,7 @@ function liveRun(id) {
     toast(on ? L('🎯 מצב ריכוז: רק מה שחשוב','🎯 Focus mode: only what matters') : L('חזרנו לתצוגה המלאה','Back to the full view'));
   });
   $('#stop').addEventListener('click', async () => {
-    if (!await ask(L('לסיים את ההקלטה ולבנות סיכום מלא?','Stop recording and build a full summary?'), { ok: L('סיימי וסכמי','Stop and summarize'), cancel: L('להמשיך להקשיב','Keep listening') })) return;
+    if (!await ask(L('לסיים את ההקלטה ולבנות סיכום מלא?','Stop recording and build a full summary?'), { ok: L('סיימו וסכמו','Stop and summarize'), cancel: L('להמשיך להקשיב','Keep listening') })) return;
     alive = false;
     const j = await api(`/api/live/${id}/stop`, { method: 'POST' });
     store.set('kashuv-live', null); document.body.classList.remove('focus');
@@ -396,7 +396,7 @@ async function summaryView(id, at) {
   const has = (a) => Array.isArray(a) && a.length;
   const tabs = [
     ['sum', L('📒 סיכום','📒 Summary')], has(m.concepts) && ['con', L('💡 מושגים','💡 Concepts')], (has(m.tasks) || has(m.questions)) && ['todo', L('✅ משימות ושאלות','✅ Tasks & questions')],
-    has(m.quiz) && ['quiz', L('🧠 תרגול','🧠 Practice')], (has(m.timeline) || has(s.marks)) && ['tl', L('🕒 ציר זמן','🕒 Timeline')], ['tr', L('📝 תמלול','📝 Transcript')], ['ask', L('💬 שאלי את ההקלטה','💬 Ask the recording')],
+    has(m.quiz) && ['quiz', L('🧠 תרגול','🧠 Practice')], (has(m.timeline) || has(s.marks)) && ['tl', L('🕒 ציר זמן','🕒 Timeline')], ['tr', L('📝 תמלול','📝 Transcript')], ['ask', L('💬 שאלו את ההקלטה','💬 Ask the recording')],
   ].filter(Boolean);
   const titleOf = Object.fromEntries(tabs);
 
@@ -540,7 +540,7 @@ function a11yView() {
     <h1 style="margin-bottom:12px">♿ ${L('הצהרת נגישות', 'Accessibility statement')}</h1>
     <p>${L('Kashuv נבנתה כדי שכל אחד ואחת יוכלו להשתמש בה בנוחות, בהתאם להנחיות WCAG 2.1 ברמה AA ולתקן הישראלי 5568.', 'Kashuv is built so everyone can use it comfortably, following WCAG 2.1 level AA and the Israeli standard IS 5568.')}</p>
     <ul class="ticks">${items.map((t) => `<li>${t}</li>`).join('')}</ul>
-    <p class="muted" style="margin-top:18px">${L('מצאת בעיה? אשמח לשמוע:', 'Found a problem? I would love to hear about it:')} <a href="https://www.linkedin.com/in/noya-adivi" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
+    <p class="muted" style="margin-top:18px">${L('מצאתם בעיה? אשמח לשמוע:', 'Found a problem? I would love to hear about it:')} <a href="https://www.linkedin.com/in/noya-adivi" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
   </section>`;
 }
 

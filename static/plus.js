@@ -105,7 +105,7 @@ function timelineHTML(s, m) {
   const pct = (x) => Math.min(100, Math.max(0, x / dur * 100)).toFixed(2);
   const colors = ['lilac', 'peach', 'mint', 'sky', 'butter'];
   return `<section class="card tbar-card pop no-print" aria-label="${L('ציר הזמן של ההרצאה', 'Lecture timeline')}">
-    <div class="tbar-head"><h3>${L('🗺️ המפה של ההרצאה', '🗺️ Lecture map')}</h3><span class="muted">${L('לחצי על נושא או סימן כדי לקפוץ לרגע הזה', 'Click a topic or a pin to jump to that moment')}</span></div>
+    <div class="tbar-head"><h3>${L('🗺️ המפה של ההרצאה', '🗺️ Lecture map')}</h3><span class="muted">${L('לחצו על נושא או סימן כדי לקפוץ לרגע הזה', 'Click a topic or a pin to jump to that moment')}</span></div>
     <div class="tbar" id="tbar">
       ${topics.map((t, i) => { const end = topics[i + 1]?.sec ?? dur; return `<button class="tb-seg" data-seek="${t.sec}" style="--s:${pct(t.sec)}%;--w:${pct(end - t.sec)}%;--c:var(--${colors[i % 5]});--c-soft:var(--${colors[i % 5]}-soft);--i:${i}" title="${fmt(t.sec)} ${esc(t.title)}"><span>${esc(t.title)}</span></button>`; }).join('')}
       ${marks.map((k) => `<button class="tb-pin star" data-seek="${k.t}" style="--s:${pct(k.t)}%" title="⭐ ${fmt(k.t)} ${esc(k.note || L('רגע חשוב', 'Important moment'))}" aria-label="⭐ ${fmt(k.t)}">⭐</button>`).join('')}
@@ -124,7 +124,7 @@ function followTimeline(audio, dur) {
 function deckHTML(quiz) {
   return `<div class="deck no-print" id="deck">
     <div class="deck-top"><div class="deck-bar"><i id="deck-fill"></i></div><span id="deck-count"></span></div>
-    <div class="deck-stage"><button class="flip deck-card" id="deck-card" type="button"><div class="in"><div class="f"><small id="deck-n"></small><span id="deck-q"></span><em>${L('לחצי כדי להפוך', 'Click to flip')}</em></div><div class="b"><small>${L('תשובה', 'Answer')}</small><span id="deck-a"></span></div></div></button></div>
+    <div class="deck-stage"><button class="flip deck-card" id="deck-card" type="button"><div class="in"><div class="f"><small id="deck-n"></small><span id="deck-q"></span><em>${L('לחצו כדי להפוך', 'Click to flip')}</em></div><div class="b"><small>${L('תשובה', 'Answer')}</small><span id="deck-a"></span></div></div></button></div>
     <div class="deck-actions"><button class="btn soft" id="deck-no" type="button">${L('🤔 עוד לא', '🤔 Not yet')}</button><button class="btn lilac" id="deck-yes" type="button">${L('✅ ידעתי', '✅ Got it')}</button></div>
     <p class="muted deck-keys">⌨️ ${L('רווח להפוך · חץ ימינה ידעתי · חץ שמאלה עוד לא', 'Space flips · right arrow got it · left arrow not yet')}</p>
   </div>
@@ -202,7 +202,7 @@ async function statsView() {
   const wd = (d) => new Date(d).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'he-IL', { weekday: 'short' });
   main.innerHTML = `
   <div class="section-title" style="margin-top:0"><h1>${L('📊 ההתקדמות שלי', '📊 My progress')}</h1>${DEMO ? `<span class="chip" style="--c:var(--butter);--c-soft:var(--butter-soft)">🧪 ${L('נתונים לדוגמה', 'Sample data')}</span>` : ''}</div>
-  ${!items.length ? `<div class="card empty">✨ ${L('עוד אין נתונים. אחרי ההקלטה הראשונה יופיעו כאן גרפים.', 'No data yet. Charts appear after your first recording.')} <a class="btn lilac" href="#/live">${L('התחילי להקשיב', 'Start listening')}</a></div>` : `
+  ${!items.length ? `<div class="card empty">✨ ${L('עוד אין נתונים. אחרי ההקלטה הראשונה יופיעו כאן גרפים.', 'No data yet. Charts appear after your first recording.')} <a class="btn lilac" href="#/live">${L('התחילו להקשיב', 'Start listening')}</a></div>` : `
   <div class="kpis">
     ${[['⏱', hours(total), L('הקשבת בסך הכל', 'Listened in total'), 'lilac'], ['📅', hours(week), L('ב-7 הימים האחרונים', 'In the last 7 days'), 'peach'],
        ['🔥', streak, L(streak === 1 ? 'יום ברצף' : 'ימים ברצף', 'day streak'), 'butter'], ['📚', items.length, L('סיכומים', 'Summaries'), 'mint']]
@@ -229,7 +229,7 @@ function tour(force = false) {
   try { if (!force && localStorage.getItem(KEY)) return; } catch (e) {}
   const steps = [
     ['#hdemo', L('👋 ככה זה נראה בזום', '👋 This is what it looks like in a Zoom'), L('קשב מתמללת בזמן אמת, בונה סיכום תוך כדי, ומקפיצה התראה כשקוראים לך.', 'Kashuv transcribes live, builds a summary as it goes and alerts you when your name is called.')],
-    ['[data-nav=live]', L('🎧 נסי האזנה חיה', '🎧 Try live listening'), L('כאן מתחילים. בדמו תראי תמלול מדומה, "מה פספסתי?" ומצב ריכוז.', 'Start here. The demo shows a sample transcript, "What did I miss?" and focus mode.')],
+    ['[data-nav=live]', L('🎧 נסו האזנה חיה', '🎧 Try live listening'), L('כאן מתחילים. בדמו תראו תמלול מדומה, "מה פספסתי?" ומצב ריכוז.', 'Start here. The demo shows a sample transcript, "What did I miss?" and focus mode.')],
     ['#recent .card', L('📒 סיכום מוכן', '📒 A finished summary'), L('מפת ההרצאה, כרטיסיות תרגול, מושגים, ושאלות על ההקלטה.', 'A lecture map, practice cards, concepts and questions about the recording.')],
     ['[data-nav=stats]', L('📊 ההתקדמות שלך', '📊 Your progress'), L('כמה הקשבת, רצף ימים והנושאים שהכי חוזרים.', 'How much you listened, your streak and your top topics.')],
   ];
@@ -246,7 +246,7 @@ function tour(force = false) {
     setTimeout(() => {
       const r = el.getBoundingClientRect(), pad = 8;
       Object.assign(ring.style, { top: r.top - pad + 'px', left: r.left - pad + 'px', width: r.width + pad * 2 + 'px', height: r.height + pad * 2 + 'px' });
-      box.innerHTML = `<small>${i + 1} / ${steps.length}</small><h3>${title}</h3><p>${text}</p><div class="tour-btns"><button class="btn soft small" type="button" data-t="skip">${L('דילוג', 'Skip')}</button><button class="btn lilac small" type="button" data-t="next">${i === steps.length - 1 ? L('בואי נתחיל 🎉', "Let's go 🎉") : L('הבא ←', 'Next →')}</button></div>`;
+      box.innerHTML = `<small>${i + 1} / ${steps.length}</small><h3>${title}</h3><p>${text}</p><div class="tour-btns"><button class="btn soft small" type="button" data-t="skip">${L('דילוג', 'Skip')}</button><button class="btn lilac small" type="button" data-t="next">${i === steps.length - 1 ? L('בואו נתחיל 🎉', "Let's go 🎉") : L('הבא ←', 'Next →')}</button></div>`;
       const below = r.bottom + 220 < innerHeight;
       box.style.top = (below ? r.bottom + 16 : Math.max(12, r.top - box.offsetHeight - 16)) + 'px';
       box.style.left = Math.min(innerWidth - box.offsetWidth - 12, Math.max(12, r.left + r.width / 2 - box.offsetWidth / 2)) + 'px';
